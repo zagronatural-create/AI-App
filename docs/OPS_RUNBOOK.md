@@ -101,6 +101,27 @@ Outputs:
 - `storage/reports/security_regression_<timestamp>.txt`
 - `storage/reports/go_live_acceptance_<timestamp>.json`
 
+## Staging release gate
+1. Copy and update staging env template:
+```bash
+cp /Users/Raghunath/Documents/AI\ APP/staging.env.example /Users/Raghunath/Documents/AI\ APP/staging.env
+```
+2. Export secrets from `staging.env` (or secret manager).
+3. Run:
+```bash
+BASE_URL=https://api-staging.example.com \
+ADMIN_TOKEN=<staging-admin-token> \
+QA_TOKEN=<staging-qa-token> \
+OPS_TOKEN=<staging-ops-token> \
+VIEWER_TOKEN=<staging-viewer-token> \
+BATCH_CODE=BATCH-2026-02-0012 \
+/Users/Raghunath/Documents/AI\ APP/scripts/run_staging_release_gate.sh
+```
+Outputs:
+- `storage/reports/staging/release_gate_<timestamp>.txt`
+- `storage/reports/staging/security_regression_<timestamp>.txt`
+- `storage/reports/staging/go_live_acceptance_<timestamp>.json`
+
 ## Failure handling
 - If run is stuck beyond SLA, call watchdog endpoint.
 - If repeated failures occur:

@@ -238,6 +238,19 @@ BATCH_CODE=BATCH-2026-02-0012 \
 ./scripts/release_gate.sh
 ```
 
+## Staging release gate
+```bash
+BASE_URL=https://api-staging.example.com \
+ADMIN_TOKEN=<staging-admin-token> \
+QA_TOKEN=<staging-qa-token> \
+OPS_TOKEN=<staging-ops-token> \
+VIEWER_TOKEN=<staging-viewer-token> \
+BATCH_CODE=BATCH-2026-02-0012 \
+./scripts/run_staging_release_gate.sh
+```
+Staging config template:
+- `staging.env.example`
+
 ## Internal dashboard
 Open:
 - `http://127.0.0.1:8000/ops`
