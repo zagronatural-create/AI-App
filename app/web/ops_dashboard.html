@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supply Intel Ops Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f7f4;
+      --bg-soft: #e8efe8;
+      --surface: #ffffff;
+      --text: #182218;
+      --muted: #4f6451;
+      --accent: #0f766e;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --ok: #166534;
+      --border: #d4e2d4;
+      --shadow: 0 6px 24px rgba(16, 24, 16, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: radial-gradient(circle at top right, #d8ebe5 0%, var(--bg) 38%, #f7faf7 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.01em;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--muted);
+      font-size: 0.82rem;
+      border: 1px solid var(--border);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .kpi { grid-column: span 3; }
+    .wide { grid-column: span 6; }
+    .full { grid-column: span 12; }
+
+    .kpi h3, .card h3 {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .kpi .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid var(--border);
+      padding: 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .row:first-child { border-top: 0; }
+
+    .dot {
+      display: inline-flex;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 6px;
+    }
+
+    .dot.ok { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .dot.bad { background: var(--danger); }
+
+    .alerts { max-height: 320px; overflow: auto; }
+
+    .alert-item {
+      border: 1px solid var(--border);
+      border-left-width: 5px;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+
+    .alert-item.warning { border-left-color: var(--warn); }
+    .alert-item.critical { border-left-color: var(--danger); }
+
+    .alert-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    button {
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      background: #eefaf8;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      padding: 5px 9px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #def3f0; }
+
+    .muted { color: var(--muted); font-size: 0.85rem; }
+
+    @media (max-width: 900px) {
+      .kpi { grid-column: span 6; }
+      .wide { grid-column: span 12; }
+    }
+
+    @media (max-width: 600px) {
+      .kpi { grid-column: span 12; }
+      .header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1 class="title">Supply Intelligence Operations</h1>
+        <p class="sub">AI-assisted monitoring and compliance documentation. Not a legal certification system.</p>
+      </div>
+      <div class="header-actions">
+        <button onclick="setAuthToken()">Set Token</button>
+        <div class="badge" id="last-refresh">Refreshing...</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card kpi"><h3>Open Alerts</h3><p class="value" id="kpi-open-alerts">-</p></div>
+      <div class="card kpi"><h3>Critical Alerts</h3><p class="value" id="kpi-critical-alerts">-</p></div>
+      <div class="card kpi"><h3>Anomalies (7d)</h3><p class="value" id="kpi-anomalies">-</p></div>
+      <div class="card kpi"><h3>Supplier Coverage</h3><p class="value" id="kpi-supplier-coverage">-</p></div>
+
+      <div class="card wide">
+        <h3>Automation Status</h3>
+        <div id="automation-status"></div>
+      </div>
+
+      <div class="card wide">
+        <h3>Compliance Snapshot</h3>
+        <div id="compliance-status"></div>
+      </div>
+
+      <div class="card full">
+        <h3>Open CCP Alerts</h3>
+        <div class="alerts" id="alerts-list"></div>
+      </div>
+
+      <div class="card full">
+        <h3>Recent Audit Events</h3>
+        <div class="alerts" id="audit-list"></div>
+      </div>
+
+      <div class="card full">
+        <h3>Audit Packs</h3>
+        <div class="row">
+          <span>Generate from current month</span>
+          <button onclick="generateAuditPack()">Generate Pack</button>
+        </div>
+        <div class="alerts" id="packs-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getToken() {
+      return localStorage.getItem('ops_api_token') || '';
+    }
+
+    function getAuthHeaders() {
+      const token = getToken();
+      if (!token) return {};
+      return { Authorization: `Bearer ${token}` };
+    }
+
+    function setAuthToken() {
+      const current = getToken();
+      const input = prompt('Paste API token (Bearer). Leave empty to clear.', current);
+      if (input === null) return;
+      const value = input.trim();
+      if (!value) {
+        localStorage.removeItem('ops_api_token');
+      } else {
+        localStorage.setItem('ops_api_token', value);
+      }
+      refresh();
+    }
+
+    async function getJson(url) {
+      const res = await fetch(url, { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+      return res.json();
+    }
+
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function renderRows(containerId, rows) {
+      const root = byId(containerId);
+      root.innerHTML = rows.map(([label, value]) => `
+        <div class="row"><span>${label}</span><strong>${value ?? "-"}</strong></div>
+      `).join("");
+    }
+
+    async function ackAlert(alertId) {
+      const who = prompt("Acknowledge by (user id):", "qa.manager");
+      if (!who) return;
+      const res = await fetch(`/api/v1/ccp/alerts/${alertId}/ack`, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json', ...getAuthHeaders()},
+        body: JSON.stringify({ acknowledged_by: who })
+      });
+      if (!res.ok) {
+        alert('Failed to acknowledge alert');
+        return;
+      }
+      await refresh();
+    }
+
+    function renderAlerts(rows) {
+      const root = byId('alerts-list');
+      if (!rows.length) {
+        root.innerHTML = '<p class="muted">No open alerts.</p>';
+        return;
+      }
+      root.innerHTML = rows.map((a) => `
+        <div class="alert-item ${a.severity}">
+          <div class="alert-head">
+            <span><strong>${a.alert_type}</strong> | ${a.batch_code ?? 'N/A'}</span>
+            <span>${new Date(a.detected_at).toLocaleString()}</span>
+          </div>
+          <div style="margin-top:6px; font-size:0.9rem;">${a.title}</div>
+          <div class="muted" style="margin-top:4px;">${a.message}</div>
+          <div style="margin-top:8px;"><button onclick="ackAlert('${a.alert_id}')">Acknowledge</button></div>
+        </div>
+      `).join('');
+    }
+
+    function renderAudit(rows) {
+      const root = byId('audit-list');
+      if (!rows.length) {
+        root.innerHTML = '<p class="muted">No audit events found.</p>';
+        return;
+      }
+      root.innerHTML = rows.map((e) => `
+        <div class="alert-item">
+          <div class="alert-head">
+            <span><strong>${e.action_type}</strong> | ${e.entity_type}:${e.entity_id}</span>
+            <span>${new Date(e.event_time).toLocaleString()}</span>
+          </div>
+          <div style="margin-top:6px; font-size:0.9rem;">Actor: ${e.actor_id}</div>
+          <div class="muted" style="margin-top:4px;">Hash: ${String(e.event_hash).slice(0, 18)}...</div>
+        </div>
+      `).join('');
+    }
+
+    async function generateAuditPack() {
+      const now = new Date();
+      const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0)).toISOString();
+      const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59)).toISOString();
+      const res = await fetch('/api/v1/audit/packs/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', ...getAuthHeaders()},
+        body: JSON.stringify({ from_ts: from, to_ts: to, limit: 10000 })
+      });
+      if (!res.ok) {
+        alert('Failed to generate audit pack');
+        return;
+      }
+      await refresh();
+    }
+
+    async function verifyPack(packId) {
+      const res = await fetch(`/api/v1/audit/packs/${packId}/verify`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders() }
+      });
+      if (!res.ok) {
+        alert('Pack verification failed');
+        return;
+      }
+      const data = await res.json();
+      alert(`Pack ${packId} verification: ${data.valid ? 'VALID' : 'INVALID'}`);
+      await refresh();
+    }
+
+    async function downloadPackFile(packId, fileName) {
+      const res = await fetch(`/api/v1/audit/packs/${packId}/download/${fileName}`, {
+        headers: { ...getAuthHeaders() }
+      });
+      if (!res.ok) {
+        alert(`Download failed for ${fileName}`);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${packId}_${fileName}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderPacks(rows) {
+      const root = byId('packs-list');
+      if (!rows.length) {
+        root.innerHTML = '<p class="muted">No audit packs generated yet.</p>';
+        return;
+      }
+      root.innerHTML = rows.map((p) => `
+        <div class="alert-item">
+          <div class="alert-head">
+            <span><strong>${p.pack_id}</strong></span>
+            <span>${new Date(p.created_at).toLocaleString()}</span>
+          </div>
+          <div class="muted" style="margin-top:6px;">Rows: ${p.row_count} | By: ${p.created_by}</div>
+          <div class="muted" style="margin-top:4px;">Path: ${p.folder_path}</div>
+          <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+            <button onclick="verifyPack('${p.pack_id}')">Verify Pack</button>
+            <button onclick="downloadPackFile('${p.pack_id}', 'audit_events.csv')">Download CSV</button>
+            <button onclick="downloadPackFile('${p.pack_id}', 'manifest.json')">Download Manifest</button>
+            <button onclick="downloadPackFile('${p.pack_id}', 'checksums.json')">Download Checksums</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function refresh() {
+      try {
+        const [overview, auto, alerts, audit, packs] = await Promise.all([
+          getJson('/api/v1/dashboard/overview'),
+          getJson('/api/v1/automation/status'),
+          getJson('/api/v1/ccp/alerts?status=open&limit=30'),
+          getJson('/api/v1/audit/events?limit=12'),
+          getJson('/api/v1/audit/packs?limit=6')
+        ]);
+
+        byId('kpi-open-alerts').textContent = overview.alerts.open_alerts ?? 0;
+        byId('kpi-critical-alerts').textContent = overview.alerts.critical_open_alerts ?? 0;
+        byId('kpi-anomalies').textContent = (overview.anomalies_7d.critical_anomalies ?? 0) + (overview.anomalies_7d.warning_anomalies ?? 0);
+        byId('kpi-supplier-coverage').textContent = `${overview.latest_kpi.supplier_risk_coverage_pct ?? 0}%`;
+
+        renderRows('automation-status', [
+          ['Running', auto.daily_cycle_running ? 'Yes' : 'No'],
+          ['Current Run ID', auto.running_run?.run_id ?? '-'],
+          ['Last Run Status', auto.last_run?.status ?? '-'],
+          ['Last Run Started', auto.last_run?.started_at ? new Date(auto.last_run.started_at).toLocaleString() : '-']
+        ]);
+
+        renderRows('compliance-status', [
+          ['Pass Batches', overview.compliance.pass_batches ?? 0],
+          ['Warning Batches', overview.compliance.warning_batches ?? 0],
+          ['Fail Batches', overview.compliance.fail_batches ?? 0],
+          ['Quality Deviation Rate', overview.latest_kpi.quality_deviation_rate ?? '-']
+        ]);
+
+        renderAlerts(alerts.rows || []);
+        renderAudit(audit.rows || []);
+        renderPacks(packs.rows || []);
+        byId('last-refresh').textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+      } catch (err) {
+        console.error(err);
+        byId('last-refresh').textContent = 'Refresh failed';
+      }
+    }
+
+    setInterval(refresh, 15000);
+    refresh();
+    window.ackAlert = ackAlert;
+    window.downloadPackFile = downloadPackFile;
+    window.generateAuditPack = generateAuditPack;
+    window.verifyPack = verifyPack;
+    window.setAuthToken = setAuthToken;
+  </script>
+</body>
+</html>
