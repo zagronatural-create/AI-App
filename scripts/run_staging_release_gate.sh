@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Auto-load staging.env when present.
+if [[ -f "staging.env" ]]; then
+  # shellcheck disable=SC1091
+  set -a
+  source staging.env
+  set +a
+fi
+
 if [[ -z "${BASE_URL:-}" ]]; then
   echo "BASE_URL is required (example: https://api-staging.example.com)" >&2
   exit 1
