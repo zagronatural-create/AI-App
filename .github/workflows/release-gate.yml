@@ -1,0 +1,89 @@
+name: Release Gate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: supply_intel
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d supply_intel"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/supply_intel
+      PSQL_URL: postgresql://postgres:postgres@127.0.0.1:5432/supply_intel
+      APP_ENV: ci
+      STORAGE_DIR: storage
+      AUTH_ENABLED: "true"
+      API_TOKEN_MAP_JSON: >-
+        {"dev-admin-token":{"user_id":"admin","roles":["admin"]},"qa-token":{"user_id":"qa.manager","roles":["qa_manager","qa_analyst"]},"ops-token":{"user_id":"ops.scheduler","roles":["ops_scheduler"]},"viewer-token":{"user_id":"auditor","roles":["viewer"]}}
+      CORS_ALLOW_ORIGINS: http://127.0.0.1:8000,http://localhost:8000
+      RATE_LIMIT_ENABLED: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Initialize database
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql "$PSQL_URL" -f sql/001_init.sql
+          psql "$PSQL_URL" -f sql/002_seed.sql
+
+      - name: Start API
+        run: |
+          nohup uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/uvicorn.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8000/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to start"
+          cat /tmp/uvicorn.log
+          exit 1
+
+      - name: Run release gate
+        run: |
+          BASE_URL=http://127.0.0.1:8000 \
+          ADMIN_TOKEN=dev-admin-token \
+          QA_TOKEN=qa-token \
+          OPS_TOKEN=ops-token \
+          VIEWER_TOKEN=viewer-token \
+          BATCH_CODE=BATCH-2026-02-0012 \
+          ./scripts/release_gate.sh
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-reports
+          path: |
+            storage/reports/**
+            /tmp/uvicorn.log
