@@ -185,6 +185,11 @@ Manual trigger path:
 
 Artifacts from each run are available under the workflow run summary in GitHub Actions.
 
+Failure alerting:
+- Workflow: `.github/workflows/ops-workflow-failure-alert.yml`
+- Trigger: any failed run of `Prod KPI Trend`, `Prod Compliance Pack`, or `Prod Supplier Calibration`
+- Action: automatically opens a GitHub Issue labeled `ops-alert`, `automation`, `priority-high`
+
 ## Staging release gate
 1. Copy and update staging env template:
 ```bash

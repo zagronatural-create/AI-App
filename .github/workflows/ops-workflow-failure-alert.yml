@@ -1,0 +1,76 @@
+name: Ops Workflow Failure Alert
+
+on:
+  workflow_run:
+    workflows:
+      - Prod KPI Trend
+      - Prod Compliance Pack
+      - Prod Supplier Calibration
+    types:
+      - completed
+
+jobs:
+  open-incident-issue:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+
+    steps:
+      - name: Create GitHub issue for failed run
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const title = `[Ops Alert] ${run.name} failed (run #${run.run_number})`;
+            const labels = ["ops-alert", "automation", "priority-high"];
+
+            const body = [
+              "## Automated Workflow Failure Alert",
+              "",
+              `- Workflow: **${run.name}**`,
+              `- Status: **${run.status} / ${run.conclusion}**`,
+              `- Event: \`${run.event}\``,
+              `- Branch: \`${run.head_branch}\``,
+              `- Commit: \`${run.head_sha}\``,
+              `- Run ID: \`${run.id}\``,
+              `- URL: ${run.html_url}`,
+              "",
+              "### Triage Checklist",
+              "- Review failed job logs in the run URL above.",
+              "- Re-run failed workflow after fixing root cause.",
+              "- Confirm latest report artifacts were generated.",
+              "",
+              "_Generated automatically by `ops-workflow-failure-alert.yml`._"
+            ].join("\\n");
+
+            // Avoid duplicate issues for the same workflow run.
+            const existing = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: "open",
+              labels: "ops-alert",
+              per_page: 100
+            });
+
+            const duplicate = existing.data.find((issue) => issue.title === title);
+            if (duplicate) {
+              core.info(`Issue already exists: #${duplicate.number}`);
+              return;
+            }
+
+            const created = await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels
+            });
+
+            core.info(`Created incident issue #${created.data.number}`);
+
