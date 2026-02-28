@@ -33,6 +33,9 @@ Operational setup for scheduler-safe daily automation cycle and watchdog recover
 - Watchdog: `scripts/watchdog_automation.sh`
 - Status check: `scripts/check_automation_status.sh`
 - Post-go-live health check: `scripts/post_go_live_check.sh`
+- KPI trend report (24h/7d): `scripts/kpi_trend_report.py`
+- Supplier model calibration report: `scripts/supplier_model_calibration.py`
+- Scheduled compliance export pack: `scripts/compliance_pack_scheduler.sh`
 
 Set environment variables:
 ```bash
@@ -112,6 +115,55 @@ RUN_LIMIT=10 \
 Outputs:
 - `storage/reports/post-go-live/post_go_live_check_<timestamp>.txt`
 - `storage/reports/post-go-live/post_go_live_check_<timestamp>.json`
+
+## KPI trend report command (24h/7d)
+```bash
+python3 /Users/Raghunath/Documents/AI\ APP/scripts/kpi_trend_report.py \
+  --base-url https://<your-prod-api-domain> \
+  --admin-token <admin-token> \
+  --out-dir /Users/Raghunath/Documents/AI\ APP/storage/reports/kpi-trends
+```
+Outputs:
+- `storage/reports/kpi-trends/kpi_trend_<timestamp>.txt`
+- `storage/reports/kpi-trends/kpi_trend_<timestamp>.json`
+
+## Supplier model calibration report command
+```bash
+DATABASE_URL=postgresql+psycopg://<user>:<password>@<prod-db-host>:5432/supply_intel \
+python3 /Users/Raghunath/Documents/AI\ APP/scripts/supplier_model_calibration.py \
+  --lookback-days 90 \
+  --min-deliveries 3 \
+  --issue-threshold 0.10 \
+  --risk-threshold 0.66 \
+  --out-dir /Users/Raghunath/Documents/AI\ APP/storage/reports/model-calibration
+```
+Outputs:
+- `storage/reports/model-calibration/supplier_calibration_<timestamp>.txt`
+- `storage/reports/model-calibration/supplier_calibration_<timestamp>.json`
+
+## Scheduled compliance export pack command
+```bash
+BASE_URL=https://<your-prod-api-domain> \
+QA_TOKEN=<qa-token> \
+VIEWER_TOKEN=<viewer-token> \
+WINDOW_HOURS=24 \
+LIMIT=10000 \
+/Users/Raghunath/Documents/AI\ APP/scripts/compliance_pack_scheduler.sh
+```
+Outputs:
+- `storage/reports/compliance-packs/compliance_pack_<timestamp>.txt`
+- `storage/reports/compliance-packs/pack_generate_<timestamp>.json`
+- `storage/reports/compliance-packs/pack_verify_<timestamp>.json`
+- `storage/reports/compliance-packs/checksums_<timestamp>.json`
+
+Cron examples:
+```cron
+# Daily compliance export pack (last 24h)
+20 6 * * * BASE_URL=https://<your-prod-api-domain> QA_TOKEN=<qa-token> VIEWER_TOKEN=<viewer-token> WINDOW_HOURS=24 /Users/Raghunath/Documents/AI\ APP/scripts/compliance_pack_scheduler.sh >> /tmp/supply_intel_compliance_pack_daily.log 2>&1
+
+# Weekly compliance export pack (last 168h = 7d), every Monday
+35 6 * * 1 BASE_URL=https://<your-prod-api-domain> QA_TOKEN=<qa-token> VIEWER_TOKEN=<viewer-token> WINDOW_HOURS=168 /Users/Raghunath/Documents/AI\ APP/scripts/compliance_pack_scheduler.sh >> /tmp/supply_intel_compliance_pack_weekly.log 2>&1
+```
 
 ## Staging release gate
 1. Copy and update staging env template:
