@@ -76,7 +76,8 @@ def batch_comparison(db: Session, batch_code: str) -> list[dict]:
         LEFT JOIN compliance_thresholds t
           ON t.parameter_code = q.parameter_code
          AND t.product_category = b.product_sku
-         AND t.effective_to IS NULL
+         AND t.effective_from <= COALESCE(q.tested_at::date, current_date)
+         AND (t.effective_to IS NULL OR t.effective_to >= COALESCE(q.tested_at::date, current_date))
         WHERE b.batch_code = :batch_code
         ORDER BY q.parameter_name;
         """

@@ -90,7 +90,8 @@ def upsert_kpi_snapshot(db: Session) -> dict:
               LEFT JOIN compliance_thresholds t
                      ON t.parameter_code = q.parameter_code
                     AND t.product_category = b.product_sku
-                    AND t.effective_to IS NULL
+                    AND t.effective_from <= COALESCE(q.tested_at::date, current_date)
+                    AND (t.effective_to IS NULL OR t.effective_to >= COALESCE(q.tested_at::date, current_date))
             )
             SELECT COALESCE(ROUND(AVG(is_fail::numeric), 3), 0) FROM evals
             """

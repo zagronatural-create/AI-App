@@ -1,0 +1,3 @@
+product_category,parameter_name,parameter_code,unit,limit_min,limit_max,severity,source_clause,remarks
+TRAD-NUTRI-500G,Moisture,MOISTURE,%,,10.0,critical,Table-1,Example upper limit
+TRAD-NUTRI-500G,Aflatoxin B1,AFLA_B1,ppb,,5.0,critical,Clause-4.2,Replace with official source value

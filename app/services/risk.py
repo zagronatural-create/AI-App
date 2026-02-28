@@ -173,7 +173,8 @@ def load_batch_features(db: Session, batch_code: str) -> dict | None:
             JOIN compliance_thresholds t
               ON t.parameter_code = q.parameter_code
              AND t.product_category = b.product_sku
-             AND t.effective_to IS NULL
+             AND t.effective_from <= COALESCE(q.tested_at::date, current_date)
+             AND (t.effective_to IS NULL OR t.effective_to >= COALESCE(q.tested_at::date, current_date))
             WHERE b.batch_code = :batch_code
               AND ((t.limit_max IS NOT NULL AND q.observed_value > t.limit_max)
                 OR (t.limit_min IS NOT NULL AND q.observed_value < t.limit_min))
@@ -201,7 +202,8 @@ def load_batch_features(db: Session, batch_code: str) -> dict | None:
               LEFT JOIN compliance_thresholds t
                      ON t.parameter_code = q.parameter_code
                     AND t.product_category = b.product_sku
-                    AND t.effective_to IS NULL
+                    AND t.effective_from <= COALESCE(q.tested_at::date, current_date)
+                    AND (t.effective_to IS NULL OR t.effective_to >= COALESCE(q.tested_at::date, current_date))
               GROUP BY sb.batch_id
             )
             SELECT COALESCE(AVG(fail_flag)::float, 0) FROM has_fail

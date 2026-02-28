@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import audit, auth, automation, ccp, compliance, dashboard, kpi, recall, risk, trace, ui
+from app.api.routes import audit, auth, automation, ccp, compliance, dashboard, kpi, recall, regulatory, risk, trace, ui
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.core.security import AuthRequiredMiddleware, InMemoryRateLimiterMiddleware, RequestContextMiddleware
@@ -37,6 +37,7 @@ app.include_router(trace.router, prefix="/api/v1/trace", tags=["traceability"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["audit"])
 app.include_router(compliance.router, prefix="/api/v1/compliance", tags=["compliance"])
+app.include_router(regulatory.router, prefix="/api/v1/compliance/regulatory", tags=["regulatory"])
 app.include_router(ccp.router, prefix="/api/v1/ccp", tags=["ccp"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(automation.router, prefix="/api/v1/automation", tags=["automation"])

@@ -67,6 +67,12 @@ This system supports validation and documentation workflows. It **does not issue
 - `GET /api/v1/compliance/labs/reports/{batch_code}/versions`
 - `GET /api/v1/compliance/batch/{batch_code}/comparison`
 - `GET /api/v1/compliance/batch/{batch_code}/export-readiness`
+- `POST /api/v1/compliance/regulatory/releases/import-csv`
+- `GET /api/v1/compliance/regulatory/releases`
+- `GET /api/v1/compliance/regulatory/releases/summary`
+- `GET /api/v1/compliance/regulatory/releases/{release_id}`
+- `POST /api/v1/compliance/regulatory/releases/{release_id}/approve`
+- `POST /api/v1/compliance/regulatory/releases/{release_id}/publish`
 - `POST /api/v1/recall/simulate`
 - `POST /api/v1/ai/supplier/score`
 - `GET /api/v1/ai/supplier/{supplier_id}/score`
@@ -164,6 +170,50 @@ Then check:
 ```bash
 curl http://127.0.0.1:8000/api/v1/compliance/labs/reports/jobs/<job_id>
 ```
+
+## Regulatory threshold release import (real source workflow)
+Import CSV as draft:
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/compliance/regulatory/releases/import-csv \
+  -H "Authorization: Bearer admin-token" \
+  -F "standard_name=FSSAI" \
+  -F "release_code=FSSAI-2025-11-MYCOTOXIN" \
+  -F "document_title=FSSAI mycotoxin limits update" \
+  -F "effective_from=2025-11-01" \
+  -F "source_authority=FSSAI" \
+  -F "publication_date=2025-10-15" \
+  -F "file=@/absolute/path/fssai_limits.csv"
+```
+
+Approve and publish:
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/compliance/regulatory/releases/<release_id>/approve \
+  -H "Authorization: Bearer admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{"notes":"Reviewed against official circular"}'
+
+curl -X POST http://127.0.0.1:8000/api/v1/compliance/regulatory/releases/<release_id>/publish \
+  -H "Authorization: Bearer admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Helper script:
+```bash
+python3 scripts/import_regulatory_release.py \
+  --base-url http://127.0.0.1:8000 \
+  --token admin-token \
+  --csv-file docs/templates/regulatory_threshold_template.csv \
+  --standard-name FSSAI \
+  --release-code FSSAI-2025-11-MYCOTOXIN \
+  --document-title "FSSAI mycotoxin limits update" \
+  --effective-from 2025-11-01 \
+  --approve \
+  --publish
+```
+
+Detailed guide:
+- `docs/REGULATORY_DATA_WORKFLOW.md`
 
 ## CCP log ingestion example
 ```bash
