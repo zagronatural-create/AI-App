@@ -56,9 +56,10 @@ def evaluate_status(observed: float, limit_min: Decimal | None, limit_max: Decim
         return "FAIL", "OUT_OF_RANGE"
 
     near_margin = 0.1
-    if limit_max is not None and observed >= float(limit_max) * (1 - near_margin):
+    # Avoid false warnings for zero-max microbiology limits (e.g., Salmonella absent in 25g).
+    if limit_max is not None and float(limit_max) > 0 and observed >= float(limit_max) * (1 - near_margin):
         risk_flag = "NEAR_UPPER_LIMIT"
-    if limit_min is not None and observed <= float(limit_min) * (1 + near_margin):
+    if limit_min is not None and float(limit_min) > 0 and observed <= float(limit_min) * (1 + near_margin):
         risk_flag = "NEAR_LOWER_LIMIT"
     if risk_flag != "NORMAL":
         status = "WARNING"
