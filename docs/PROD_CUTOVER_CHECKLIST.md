@@ -163,4 +163,4 @@ Record before final declaration:
   - Verify outcome: `valid=true`, `missing_files=[]`, `mismatches=[]`
   - Download check: `checksums.json` HTTP `200`
   - Timestamp (UTC): `2026-02-28T10:23:51Z`
-- Approver names (Engineering, QA, Operations): `Pending manual sign-off entry`
+- Approver names (Engineering, QA, Operations): `Raghunath Kadam (Engineering), Raghunath Kadam (QA), Raghunath Kadam (Operations)`
