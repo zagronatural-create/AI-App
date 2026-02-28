@@ -1,6 +1,6 @@
 from app.services.compliance import evaluate_status, normalize_parameter_code, parse_lab_text
 from app.services.ccp import _is_near, _is_outside
-from app.services.risk import batch_risk_score, supplier_risk_score
+from app.services.risk import _matrix_zone, _supplier_metric_band, batch_risk_score, supplier_risk_score
 
 
 def test_parse_lab_text_extracts_rows():
@@ -53,3 +53,19 @@ def test_batch_risk_score_outputs_band():
     )
     assert result["risk_band"] in {"LOW", "MEDIUM", "HIGH"}
     assert 0 <= result["risk_score"] <= 100
+
+
+def test_supplier_metric_band_thresholds():
+    assert _supplier_metric_band("delay_rate_90d", 0.02) == "LOW"
+    assert _supplier_metric_band("delay_rate_90d", 0.09) == "MEDIUM"
+    assert _supplier_metric_band("delay_rate_90d", 0.2) == "HIGH"
+    assert _supplier_metric_band("volume_cv", 0.1) == "LOW"
+    assert _supplier_metric_band("volume_cv", 0.25) == "MEDIUM"
+    assert _supplier_metric_band("volume_cv", 0.5) == "HIGH"
+
+
+def test_matrix_zone_classification():
+    assert _matrix_zone(0.8, 70) == "CRITICAL"
+    assert _matrix_zone(0.55, 60) == "HIGH"
+    assert _matrix_zone(0.4, 20) == "MEDIUM"
+    assert _matrix_zone(0.2, 20) == "LOW"

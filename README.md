@@ -77,7 +77,9 @@ This system supports validation and documentation workflows. It **does not issue
 - `POST /api/v1/recall/simulate`
 - `POST /api/v1/ai/supplier/score`
 - `GET /api/v1/ai/supplier/{supplier_id}/score`
+- `GET /api/v1/ai/supplier/heatmap`
 - `POST /api/v1/ai/batch/{batch_code}/score`
+- `GET /api/v1/ai/batch/risk-matrix`
 - `POST /api/v1/ai/anomalies/run`
 - `GET /api/v1/ai/anomalies`
 - `GET /api/v1/kpi/daily`
@@ -249,6 +251,18 @@ curl -X POST http://127.0.0.1:8000/api/v1/ai/batch/BATCH-2026-02-0012/score
 curl -X POST http://127.0.0.1:8000/api/v1/ai/anomalies/run \
   -H 'Content-Type: application/json' \
   -d '{"lookback_hours":72,"z_threshold":2.5,"actor_id":"qa.manager"}'
+```
+
+## Supplier risk heatmap example
+```bash
+curl "http://127.0.0.1:8000/api/v1/ai/supplier/heatmap?limit=25" \
+  -H "Authorization: Bearer viewer-token"
+```
+
+## Batch risk matrix example
+```bash
+curl "http://127.0.0.1:8000/api/v1/ai/batch/risk-matrix?limit=40" \
+  -H "Authorization: Bearer viewer-token"
 ```
 
 ## Daily automation cycle

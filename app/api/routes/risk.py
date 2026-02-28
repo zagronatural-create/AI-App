@@ -5,7 +5,13 @@ from app.core.auth import AuthUser, require_roles
 from app.db.session import get_db
 from app.schemas.risk import AnomalyScanIn, SupplierFeatureInput
 from app.services.anomaly import list_anomalies, run_anomaly_scan
-from app.services.risk import load_supplier_features, score_batch_and_store, supplier_risk_score
+from app.services.risk import (
+    list_batch_risk_matrix,
+    list_supplier_risk_heatmap,
+    load_supplier_features,
+    score_batch_and_store,
+    supplier_risk_score,
+)
 
 router = APIRouter()
 
@@ -49,3 +55,33 @@ def run_anomalies(
 @router.get("/anomalies")
 def get_anomalies(limit: int = 200, db: Session = Depends(get_db)) -> dict:
     return {"rows": list_anomalies(db, limit=limit)}
+
+
+@router.get("/supplier/heatmap")
+def supplier_heatmap(
+    limit: int = 25,
+    db: Session = Depends(get_db),
+    current_user: AuthUser = Depends(
+        require_roles("viewer", "qa_analyst", "qa_manager", "compliance_manager", "ops_scheduler", "admin")
+    ),
+) -> dict:
+    _ = current_user
+    safe_limit = min(max(int(limit), 1), 200)
+    data = list_supplier_risk_heatmap(db, limit=safe_limit)
+    data["note"] = "Supplier heatmap is AI-assisted risk intelligence, not legal certification."
+    return data
+
+
+@router.get("/batch/risk-matrix")
+def batch_risk_matrix(
+    limit: int = 40,
+    db: Session = Depends(get_db),
+    current_user: AuthUser = Depends(
+        require_roles("viewer", "qa_analyst", "qa_manager", "compliance_manager", "ops_scheduler", "admin")
+    ),
+) -> dict:
+    _ = current_user
+    safe_limit = min(max(int(limit), 1), 300)
+    data = list_batch_risk_matrix(db, limit=safe_limit)
+    data["note"] = "Batch matrix supports prioritization; final release/recall decisions remain with authorized teams."
+    return data

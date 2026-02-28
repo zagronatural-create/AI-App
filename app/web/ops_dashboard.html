@@ -269,6 +269,30 @@
       background: #f7faf8;
     }
 
+    .status.low {
+      color: var(--ok);
+      border-color: #96c8a4;
+      background: #e9f7ed;
+    }
+
+    .status.medium {
+      color: #8a4809;
+      border-color: #f1cfad;
+      background: #fff5eb;
+    }
+
+    .status.high {
+      color: #8f1c1c;
+      border-color: #f2c0c0;
+      background: #fff0f0;
+    }
+
+    .status.critical {
+      color: #fff;
+      border-color: #7f1d1d;
+      background: #991b1b;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -343,6 +367,48 @@
         <h3>Compliance Snapshot</h3>
         <p class="note">Batch-level PASS/WARNING/FAIL distribution from latest measurements.</p>
         <div id="compliance-status"></div>
+      </div>
+
+      <div class="card full">
+        <h3>Supplier Risk Heatmap</h3>
+        <p class="note">Rows are suppliers; color bands reflect delay, quality deviation, rejection, and volume inconsistency risk.</p>
+        <div id="supplier-heatmap-summary"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Delay (90d)</th>
+                <th>Quality Deviation (180d)</th>
+                <th>Rejection (180d)</th>
+                <th>Volume CV (90d)</th>
+                <th>Risk Score</th>
+              </tr>
+            </thead>
+            <tbody id="supplier-heatmap-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card full">
+        <h3>Batch Risk Matrix</h3>
+        <p class="note">Prioritization matrix using predicted deviation probability (X) and impact score (Y).</p>
+        <div id="batch-matrix-summary"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Batch</th>
+                <th>Deviation Probability</th>
+                <th>Impact Score</th>
+                <th>Risk Zone</th>
+                <th>Model Band</th>
+                <th>Dispatch Qty</th>
+              </tr>
+            </thead>
+            <tbody id="batch-matrix-body"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="card full">
@@ -571,6 +637,29 @@
       return `<span class="status ${klass}">${esc(s)}</span>`;
     }
 
+    function bandChip(band) {
+      const value = String(band || "LOW").toUpperCase();
+      let klass = "low";
+      if (value === "MEDIUM") klass = "medium";
+      if (value === "HIGH") klass = "high";
+      return `<span class="status ${klass}">${esc(value)}</span>`;
+    }
+
+    function zoneChip(zone) {
+      const value = String(zone || "LOW").toUpperCase();
+      let klass = "low";
+      if (value === "MEDIUM") klass = "medium";
+      if (value === "HIGH") klass = "high";
+      if (value === "CRITICAL") klass = "critical";
+      return `<span class="status ${klass}">${esc(value)}</span>`;
+    }
+
+    function fmtPct(value) {
+      const n = Number(value || 0);
+      if (Number.isNaN(n)) return "-";
+      return `${n.toFixed(2)}%`;
+    }
+
     async function ackAlert(alertId) {
       if (!hasAnyRole(["qa_manager", "compliance_manager", "admin"])) {
         alert("Your role cannot acknowledge alerts.");
@@ -721,6 +810,78 @@
         .join("");
     }
 
+    function renderSupplierHeatmap(payload) {
+      const summaryRoot = byId("supplier-heatmap-summary");
+      const tableBody = byId("supplier-heatmap-body");
+      const summary = payload?.summary || {};
+      const rows = payload?.rows || [];
+
+      summaryRoot.innerHTML = `
+        <div class="row"><span>Total Suppliers</span><strong>${esc(summary.total_suppliers ?? 0)}</strong></div>
+        <div class="row"><span>High Risk Suppliers</span><strong>${esc(summary.high_risk_suppliers ?? 0)}</strong></div>
+        <div class="row"><span>Medium Risk Suppliers</span><strong>${esc(summary.medium_risk_suppliers ?? 0)}</strong></div>
+      `;
+
+      if (!rows.length) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="muted">No supplier risk rows available.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = rows
+        .map((r) => {
+          return `
+            <tr>
+              <td>
+                <div><strong>${esc(r.supplier_name)}</strong></div>
+                <div class="muted">${esc(r.supplier_id)}</div>
+              </td>
+              <td>${fmtPct(r.delay_rate_pct)} ${bandChip(r.delay_band)}</td>
+              <td>${fmtPct(r.quality_deviation_rate_pct)} ${bandChip(r.quality_band)}</td>
+              <td>${fmtPct(r.rejection_rate_pct)} ${bandChip(r.rejection_band)}</td>
+              <td>${esc(Number(r.volume_cv ?? 0).toFixed(3))} ${bandChip(r.volume_band)}</td>
+              <td>${esc(Number(r.risk_score ?? 0).toFixed(2))} ${bandChip(r.risk_band)}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function renderBatchRiskMatrix(payload) {
+      const summaryRoot = byId("batch-matrix-summary");
+      const tableBody = byId("batch-matrix-body");
+      const summary = payload?.summary || {};
+      const rows = payload?.rows || [];
+
+      summaryRoot.innerHTML = `
+        <div class="row"><span>Total Batches</span><strong>${esc(summary.total_batches ?? 0)}</strong></div>
+        <div class="row"><span>Critical Zone</span><strong>${esc(summary.critical_zone ?? 0)}</strong></div>
+        <div class="row"><span>High Zone</span><strong>${esc(summary.high_zone ?? 0)}</strong></div>
+      `;
+
+      if (!rows.length) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="muted">No batch matrix points available.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = rows
+        .map((r) => {
+          return `
+            <tr>
+              <td>
+                <div><strong>${esc(r.batch_code)}</strong></div>
+                <div class="muted">${esc(r.product_sku)}</div>
+              </td>
+              <td>${fmtPct((Number(r.predicted_deviation_probability || 0) * 100))}</td>
+              <td>${fmtPct(r.impact_score)}</td>
+              <td>${zoneChip(r.risk_zone)}</td>
+              <td>${bandChip(r.model_risk_band)}</td>
+              <td>${esc(Number(r.impact_inputs?.dispatch_qty_total ?? 0).toFixed(3))}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
     function toIsoDateTime(value) {
       if (!value) return null;
       return new Date(value).toISOString();
@@ -863,12 +1024,14 @@
       clearError();
       await loadWhoAmI();
 
-      const [overviewRes, automationRes, alertsRes, auditRes, packsRes] = await Promise.allSettled([
+      const [overviewRes, automationRes, alertsRes, auditRes, packsRes, heatmapRes, matrixRes] = await Promise.allSettled([
         fetchJson("/api/v1/dashboard/overview"),
         fetchJson("/api/v1/automation/status"),
         fetchJson("/api/v1/ccp/alerts?status=open&limit=30"),
         fetchJson("/api/v1/audit/events?limit=12"),
         fetchJson("/api/v1/audit/packs?limit=6"),
+        fetchJson("/api/v1/ai/supplier/heatmap?limit=25"),
+        fetchJson("/api/v1/ai/batch/risk-matrix?limit=40"),
       ]);
 
       const overview = overviewRes.status === "fulfilled" ? overviewRes.value : {};
@@ -876,13 +1039,17 @@
       const alerts = alertsRes.status === "fulfilled" ? alertsRes.value : { rows: [] };
       const audit = auditRes.status === "fulfilled" ? auditRes.value : { rows: [] };
       const packs = packsRes.status === "fulfilled" ? packsRes.value : { rows: [] };
+      const heatmap = heatmapRes.status === "fulfilled" ? heatmapRes.value : { rows: [], summary: {} };
+      const matrix = matrixRes.status === "fulfilled" ? matrixRes.value : { rows: [], summary: {} };
 
       if (
         overviewRes.status === "rejected" ||
         automationRes.status === "rejected" ||
         alertsRes.status === "rejected" ||
         auditRes.status === "rejected" ||
-        packsRes.status === "rejected"
+        packsRes.status === "rejected" ||
+        heatmapRes.status === "rejected" ||
+        matrixRes.status === "rejected"
       ) {
         showError("Some dashboard panels could not refresh. Check token, role permissions, and API health.");
       }
@@ -909,6 +1076,8 @@
       renderAlerts(alerts.rows || []);
       renderAudit(audit.rows || []);
       renderPacks(packs.rows || []);
+      renderSupplierHeatmap(heatmap);
+      renderBatchRiskMatrix(matrix);
       await loadBatchComparison(state.selectedBatch);
 
       updateActionVisibility();
