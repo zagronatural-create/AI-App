@@ -32,6 +32,7 @@ Operational setup for scheduler-safe daily automation cycle and watchdog recover
 - Trigger: `scripts/run_daily_cycle.sh`
 - Watchdog: `scripts/watchdog_automation.sh`
 - Status check: `scripts/check_automation_status.sh`
+- Post-go-live health check: `scripts/post_go_live_check.sh`
 
 Set environment variables:
 ```bash
@@ -100,6 +101,17 @@ Outputs:
 - `storage/reports/release_gate_<timestamp>.txt`
 - `storage/reports/security_regression_<timestamp>.txt`
 - `storage/reports/go_live_acceptance_<timestamp>.json`
+
+## Post-go-live health check command
+```bash
+BASE_URL=https://<your-prod-api-domain> \
+ADMIN_TOKEN=<admin-token> \
+RUN_LIMIT=10 \
+/Users/Raghunath/Documents/AI\ APP/scripts/post_go_live_check.sh
+```
+Outputs:
+- `storage/reports/post-go-live/post_go_live_check_<timestamp>.txt`
+- `storage/reports/post-go-live/post_go_live_check_<timestamp>.json`
 
 ## Staging release gate
 1. Copy and update staging env template:
