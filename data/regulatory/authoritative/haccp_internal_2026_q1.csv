@@ -1,0 +1,9 @@
+product_category,parameter_name,parameter_code,unit,limit_min,limit_max,severity,source_clause,remarks
+TRAD-NUTRI-500G,Aflatoxins Total,AFLA_TOTAL,ug/kg,,4,critical,"HACCP PLAN 2026-Q1 CCP-RAW-03","Set to stricter than applicable external limits"
+TRAD-NUTRI-500G,Aflatoxin B1,AFLA_B1,ug/kg,,2,critical,"HACCP PLAN 2026-Q1 CCP-RAW-03","Set to stricter than applicable external limits"
+TRAD-NUTRI-500G,Lead,LEAD,mg/kg,,0.15,critical,"HACCP PLAN 2026-Q1 CCP-RAW-04","Internal tighter control"
+TRAD-NUTRI-500G,Cadmium,CADMIUM,mg/kg,,0.08,critical,"HACCP PLAN 2026-Q1 CCP-RAW-04","Internal tighter control"
+TRAD-NUTRI-500G,Moisture,MOISTURE,%,,8.5,high,"HACCP PLAN 2026-Q1 CCP-DRY-01","Aligned to drying CCP gate"
+TRAD-NUTRI-500G,Salmonella,SALMONELLA,cfu/25g,,0,critical,"HACCP PLAN 2026-Q1 CCP-MICRO-01","Absence in 25g"
+TRAD-NUTRI-500G,E. coli,E_COLI,cfu/g,,10,high,"HACCP PLAN 2026-Q1 CCP-MICRO-02","Process hygiene gate"
+TRAD-NUTRI-500G,Yeast and Mold,YEAST_MOLD,cfu/g,,1000,medium,"HACCP PLAN 2026-Q1 CCP-MICRO-03","Shelf stability trend gate"

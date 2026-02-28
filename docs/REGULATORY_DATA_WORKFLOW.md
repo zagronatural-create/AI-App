@@ -4,7 +4,35 @@ This workflow is for loading **real threshold values** (FSSAI, EU, Codex, HACCP 
 
 The system supports AI-assisted validation and documentation. It does **not** issue legal certification.
 
-## 1) Prepare official source packet
+## 1) Use the authoritative bundle (recommended)
+
+Curated bundle files are shipped in:
+
+- `/Users/Raghunath/Documents/AI APP/data/regulatory/authoritative/authoritative_bundle.json`
+- `/Users/Raghunath/Documents/AI APP/data/regulatory/authoritative/*.csv`
+- `/Users/Raghunath/Documents/AI APP/data/regulatory/authoritative/SOURCES.md`
+
+The bundle covers required parameters for `TRAD-NUTRI-500G` with normalized units and dated releases.
+
+Before loading into production DB, apply:
+
+- `/Users/Raghunath/Documents/AI APP/sql/migrations/011_regulatory_coverage_profile.sql`
+- `/Users/Raghunath/Documents/AI APP/sql/migrations/012_regulatory_coverage_profile_v2.sql`
+
+Run full load:
+
+```bash
+python3 /Users/Raghunath/Documents/AI\ APP/scripts/load_authoritative_regulatory_bundle.py \
+  --base-url https://ai-app-qgrl.onrender.com \
+  --token "<ADMIN_TOKEN>" \
+  --approve \
+  --publish \
+  --skip-existing
+```
+
+This imports all FSSAI/EU/Codex/HACCP releases in the manifest, checks release coverage, then publishes.
+
+## 2) Prepare official source packet (manual release path)
 
 For each release, collect:
 
@@ -15,8 +43,10 @@ For each release, collect:
 - `publication_date`: `YYYY-MM-DD`
 - `effective_from`: `YYYY-MM-DD`
 - `effective_to`: optional `YYYY-MM-DD`
+- `source_authority`: required (e.g., FSSAI, EFSA, Codex Secretariat, Internal HACCP Board)
+- `source_clause`: required for every threshold row
 
-## 2) Fill threshold CSV
+## 3) Fill threshold CSV
 
 Start from template:
 
@@ -41,8 +71,15 @@ Rules:
 
 - At least one of `limit_min` or `limit_max` is required.
 - One row per `(product_category, parameter_code)` per release.
+- `source_clause` is required for each row.
+- Units are normalized automatically; use canonical values where possible:
+  - `%`
+  - `ug/kg` (for ppb equivalents)
+  - `mg/kg` (for ppm equivalents)
+  - `cfu/g`
+  - `cfu/25g`
 
-## 3) Import release as draft
+## 4) Import release as draft
 
 ```bash
 python3 /Users/Raghunath/Documents/AI\ APP/scripts/import_regulatory_release.py \
@@ -57,7 +94,7 @@ python3 /Users/Raghunath/Documents/AI\ APP/scripts/import_regulatory_release.py 
   --source-authority FSSAI
 ```
 
-## 4) Approve and publish
+## 5) Approve and publish
 
 ```bash
 python3 /Users/Raghunath/Documents/AI\ APP/scripts/import_regulatory_release.py \
@@ -74,7 +111,7 @@ python3 /Users/Raghunath/Documents/AI\ APP/scripts/import_regulatory_release.py 
   --publish
 ```
 
-## 5) Verify loaded data
+## 6) Verify loaded data
 
 ```bash
 curl -sS "https://ai-app-qgrl.onrender.com/api/v1/compliance/regulatory/releases?limit=20" \
@@ -87,3 +124,23 @@ curl -sS "https://ai-app-qgrl.onrender.com/api/v1/compliance/regulatory/releases
 ```
 
 Published releases are promoted into `compliance_thresholds` and become active for batch comparison by effective date.
+
+## 7) Validate coverage completeness
+
+Before final sign-off, run:
+
+```bash
+python3 /Users/Raghunath/Documents/AI\ APP/scripts/validate_regulatory_coverage.py \
+  --base-url https://ai-app-qgrl.onrender.com \
+  --token "<VIEW_OR_ADMIN_TOKEN>" \
+  --product-category TRAD-NUTRI-500G
+```
+
+To validate a specific imported release:
+
+```bash
+python3 /Users/Raghunath/Documents/AI\ APP/scripts/validate_regulatory_coverage.py \
+  --base-url https://ai-app-qgrl.onrender.com \
+  --token "<VIEW_OR_ADMIN_TOKEN>" \
+  --release-id "<release_uuid>"
+```

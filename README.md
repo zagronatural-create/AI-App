@@ -72,8 +72,11 @@ This system supports validation and documentation workflows. It **does not issue
 - `GET /api/v1/compliance/regulatory/releases`
 - `GET /api/v1/compliance/regulatory/releases/summary`
 - `GET /api/v1/compliance/regulatory/releases/{release_id}`
+- `GET /api/v1/compliance/regulatory/releases/{release_id}/coverage`
 - `POST /api/v1/compliance/regulatory/releases/{release_id}/approve`
 - `POST /api/v1/compliance/regulatory/releases/{release_id}/publish`
+- `GET /api/v1/compliance/regulatory/coverage/requirements`
+- `GET /api/v1/compliance/regulatory/coverage/active`
 - `POST /api/v1/recall/simulate`
 - `POST /api/v1/ai/supplier/score`
 - `GET /api/v1/ai/supplier/{supplier_id}/score`
@@ -175,6 +178,21 @@ curl http://127.0.0.1:8000/api/v1/compliance/labs/reports/jobs/<job_id>
 ```
 
 ## Regulatory threshold release import (real source workflow)
+Authoritative bundle files:
+- `data/regulatory/authoritative/authoritative_bundle.json`
+- `data/regulatory/authoritative/*.csv`
+- `data/regulatory/authoritative/SOURCES.md`
+
+One-command authoritative load (imports all standards, checks coverage, approves, publishes):
+```bash
+python3 scripts/load_authoritative_regulatory_bundle.py \
+  --base-url https://ai-app-qgrl.onrender.com \
+  --token admin-token \
+  --approve \
+  --publish \
+  --skip-existing
+```
+
 Import CSV as draft:
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/compliance/regulatory/releases/import-csv \
@@ -187,6 +205,12 @@ curl -X POST http://127.0.0.1:8000/api/v1/compliance/regulatory/releases/import-
   -F "publication_date=2025-10-15" \
   -F "file=@/absolute/path/fssai_limits.csv"
 ```
+
+Authoritative import guardrails:
+- `source_authority` and `publication_date` are required.
+- Every row must include `source_clause`.
+- Units are normalized to canonical forms (e.g., `ppb -> ug/kg`, `ppm -> mg/kg`).
+- Missing required parameters or unit mismatches block import/approval/publish.
 
 Approve and publish:
 ```bash
@@ -215,8 +239,20 @@ python3 scripts/import_regulatory_release.py \
   --publish
 ```
 
+Coverage validation:
+```bash
+python3 scripts/validate_regulatory_coverage.py \
+  --base-url http://127.0.0.1:8000 \
+  --token viewer-token \
+  --product-category TRAD-NUTRI-500G
+```
+
 Detailed guide:
 - `docs/REGULATORY_DATA_WORKFLOW.md`
+
+Important:
+- Apply `sql/migrations/011_regulatory_coverage_profile.sql` and `sql/migrations/012_regulatory_coverage_profile_v2.sql` in production before publishing new releases.
+- Coverage checks support validation and documentation intelligence; they do not grant legal certification.
 
 ## CCP log ingestion example
 ```bash

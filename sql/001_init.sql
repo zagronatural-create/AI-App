@@ -165,6 +165,24 @@ CREATE TABLE IF NOT EXISTS regulatory_threshold_values (
   CHECK (limit_min IS NOT NULL OR limit_max IS NOT NULL)
 );
 
+CREATE TABLE IF NOT EXISTS regulatory_parameter_requirements (
+  requirement_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_category TEXT NOT NULL,
+  parameter_code TEXT NOT NULL,
+  parameter_name TEXT NOT NULL,
+  canonical_unit TEXT NOT NULL,
+  require_fssai BOOLEAN NOT NULL DEFAULT true,
+  require_eu BOOLEAN NOT NULL DEFAULT true,
+  require_codex BOOLEAN NOT NULL DEFAULT true,
+  require_haccp_internal BOOLEAN NOT NULL DEFAULT true,
+  is_mandatory BOOLEAN NOT NULL DEFAULT true,
+  effective_from DATE NOT NULL,
+  effective_to DATE,
+  source_note TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (product_category, parameter_code, effective_from)
+);
+
 CREATE TABLE IF NOT EXISTS ccp_logs (
   ccp_log_id UUID PRIMARY KEY,
   batch_id UUID NOT NULL REFERENCES production_batches(batch_id),
@@ -325,6 +343,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_reg_value_release_key
 ON regulatory_threshold_values(release_id, product_category, parameter_code);
 CREATE INDEX IF NOT EXISTS idx_reg_value_lookup
 ON regulatory_threshold_values(product_category, parameter_code);
+CREATE INDEX IF NOT EXISTS idx_reg_param_req_lookup
+ON regulatory_parameter_requirements(product_category, parameter_code, effective_from, effective_to);
 CREATE INDEX IF NOT EXISTS idx_ingestion_jobs_status ON ingestion_jobs(status, created_at DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_lab_report_version ON lab_reports(batch_id, lab_name, version_no);
 CREATE INDEX IF NOT EXISTS idx_ccp_rules_lookup ON ccp_rules(ccp_code, metric_name, active);

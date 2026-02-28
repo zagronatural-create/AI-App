@@ -33,6 +33,13 @@ psql "postgresql://<user>:<password>@<prod-db-host>:5432/supply_intel" -f sql/00
 
 If you already have live data, apply only required migrations under `sql/migrations/` according to your migration policy.
 
+Mandatory for authoritative regulatory coverage:
+
+```bash
+psql "postgresql://<user>:<password>@<prod-db-host>:5432/supply_intel" -f sql/migrations/011_regulatory_coverage_profile.sql
+psql "postgresql://<user>:<password>@<prod-db-host>:5432/supply_intel" -f sql/migrations/012_regulatory_coverage_profile_v2.sql
+```
+
 ## 3) Deploy application
 - Deploy API service with production env values.
 - Confirm service health:
@@ -69,6 +76,20 @@ Artifacts:
 - `storage/reports/staging/go_live_acceptance_<timestamp>.json`
 
 ## 5) Operational drills (must pass)
+### 5.0 Regulatory bundle load and coverage check
+```bash
+python3 ./scripts/load_authoritative_regulatory_bundle.py \
+  --base-url https://<your-prod-api-domain> \
+  --token <admin-token> \
+  --approve \
+  --publish \
+  --skip-existing
+```
+
+Acceptance:
+- All four releases imported/approved/published (FSSAI, EU, CODEX, HACCP_INTERNAL).
+- `coverage_pct=100` from `GET /api/v1/compliance/regulatory/coverage/active`.
+
 ### 5.1 Recall simulation
 ```bash
 curl -X POST "https://<your-prod-api-domain>/api/v1/recall/simulate" \

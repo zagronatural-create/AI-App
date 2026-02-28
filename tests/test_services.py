@@ -1,5 +1,6 @@
-from app.services.compliance import evaluate_status, normalize_parameter_code, parse_lab_text
+from app.services.compliance import _convert_value, evaluate_status, normalize_parameter_code, parse_lab_text
 from app.services.ccp import _is_near, _is_outside
+from app.services.regulatory import normalize_unit, parse_threshold_csv
 from app.services.risk import _matrix_zone, _supplier_metric_band, batch_risk_score, supplier_risk_score
 
 
@@ -31,6 +32,7 @@ def test_supplier_risk_score_high_band():
 
 def test_normalize_parameter_code_aliases():
     assert normalize_parameter_code("Aflatoxin B1") == "AFLA_B1"
+    assert normalize_parameter_code("Total Aflatoxins") == "AFLA_TOTAL"
     assert normalize_parameter_code("Total Plate Count") == "TPC"
 
 
@@ -69,3 +71,34 @@ def test_matrix_zone_classification():
     assert _matrix_zone(0.55, 60) == "HIGH"
     assert _matrix_zone(0.4, 20) == "MEDIUM"
     assert _matrix_zone(0.2, 20) == "LOW"
+
+
+def test_normalize_unit_aliases():
+    assert normalize_unit("ppb") == "ug/kg"
+    assert normalize_unit("ppm") == "mg/kg"
+    assert normalize_unit("CFU/25g") == "cfu/25g"
+    assert normalize_unit("%") == "%"
+
+
+def test_parse_threshold_csv_requires_source_clause_and_normalizes_units():
+    content = (
+        "product_category,parameter_name,parameter_code,unit,limit_max,severity,source_clause\n"
+        "TRAD-NUTRI-500G,Aflatoxin B1,AFLA_B1,ppb,2,critical,Clause 4.2\n"
+    ).encode("utf-8")
+    rows, errors = parse_threshold_csv(content)
+    assert not errors
+    assert len(rows) == 1
+    assert rows[0]["unit"] == "ug/kg"
+
+    bad = (
+        "product_category,parameter_name,parameter_code,unit,limit_max,severity\n"
+        "TRAD-NUTRI-500G,Aflatoxin B1,AFLA_B1,ppb,2,critical\n"
+    ).encode("utf-8")
+    _, bad_errors = parse_threshold_csv(bad)
+    assert any("source_clause is required" in e for e in bad_errors)
+
+
+def test_unit_conversion_between_ugkg_and_mgkg():
+    assert _convert_value(1000.0, "ug/kg", "mg/kg") == 1.0
+    assert _convert_value(0.1, "mg/kg", "ug/kg") == 100.0
+    assert _convert_value(5.0, "%", "mg/kg") is None

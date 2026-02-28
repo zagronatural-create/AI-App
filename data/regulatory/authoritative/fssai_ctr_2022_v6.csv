@@ -1,0 +1,5 @@
+product_category,parameter_name,parameter_code,unit,limit_min,limit_max,severity,source_clause,remarks
+TRAD-NUTRI-500G,Aflatoxins Total,AFLA_TOTAL,ug/kg,,15,critical,"Table 2.2.1 Item 1: Total Aflatoxins, Cereal and cereal products","FSSAI Compendium Version VI (27-01-2022)"
+TRAD-NUTRI-500G,Aflatoxin B1,AFLA_B1,ug/kg,,10,critical,"Table 2.2.1 Item 2: Aflatoxin B1, Cereal and cereal products","FSSAI Compendium Version VI (27-01-2022)"
+TRAD-NUTRI-500G,Lead,LEAD,mg/kg,,0.2,critical,"Table 2.1 Lead: Cereal grains except buckwheat, canihua and quinoa","FSSAI Compendium Version VI (27-01-2022)"
+TRAD-NUTRI-500G,Cadmium,CADMIUM,mg/kg,,0.1,critical,"Table 2.1 Cadmium: Cereal grains except buckwheat, canihua and quinoa (excluding wheat/rice and bran/germ)","FSSAI Compendium Version VI (27-01-2022)"

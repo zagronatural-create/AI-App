@@ -7,6 +7,25 @@ from decimal import Decimal
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+UNIT_ALIASES = {
+    "%": "%",
+    "percent": "%",
+    "percentage": "%",
+    "ppb": "ug/kg",
+    "ug/kg": "ug/kg",
+    "µg/kg": "ug/kg",
+    "μg/kg": "ug/kg",
+    "mcg/kg": "ug/kg",
+    "ppm": "mg/kg",
+    "mg/kg": "mg/kg",
+    "cfu/g": "cfu/g",
+    "cfu per g": "cfu/g",
+    "cfu/25g": "cfu/25g",
+    "cfu per 25g": "cfu/25g",
+    "absence/25g": "cfu/25g",
+    "absent/25g": "cfu/25g",
+}
+
 
 def parse_lab_text(raw_text: str) -> list[dict]:
     """Simple parameter extraction fallback before full OCR/NLP pipeline."""
@@ -30,10 +49,42 @@ def normalize_parameter_code(parameter_name: str) -> str:
     aliases = {
         "MOISTURE": "MOISTURE",
         "AFLATOXIN_B1": "AFLA_B1",
+        "AFLATOXINS_TOTAL": "AFLA_TOTAL",
+        "TOTAL_AFLATOXINS": "AFLA_TOTAL",
         "AFLA_B1": "AFLA_B1",
+        "AFLA_TOTAL": "AFLA_TOTAL",
+        "LEAD": "LEAD",
+        "CADMIUM": "CADMIUM",
+        "SALMONELLA": "SALMONELLA",
+        "E_COLI": "E_COLI",
+        "YEAST_AND_MOLD": "YEAST_MOLD",
+        "YEAST_MOLD": "YEAST_MOLD",
         "TOTAL_PLATE_COUNT": "TPC",
     }
     return aliases.get(key, key)
+
+
+def normalize_unit(raw_unit: str | None) -> str:
+    cleaned = (raw_unit or "").strip()
+    if not cleaned:
+        return ""
+    lowered = cleaned.lower().replace("μ", "µ")
+    compact = " ".join(lowered.split())
+    return UNIT_ALIASES.get(compact, compact)
+
+
+def _convert_value(value: float, from_unit: str, to_unit: str) -> float | None:
+    src = normalize_unit(from_unit)
+    dst = normalize_unit(to_unit)
+    if not src or not dst:
+        return None
+    if src == dst:
+        return value
+    if src == "ug/kg" and dst == "mg/kg":
+        return value / 1000.0
+    if src == "mg/kg" and dst == "ug/kg":
+        return value * 1000.0
+    return None
 
 
 def _format_limit(limit_min: Decimal | None, limit_max: Decimal | None, unit: str) -> str | None:
@@ -117,7 +168,14 @@ def batch_comparison(db: Session, batch_code: str) -> list[dict]:
         for std in [fssai, eu, codex, haccp]:
             if not std:
                 continue
-            status, risk = evaluate_status(observed, std["limit_min"], std["limit_max"])
+            eval_unit = std["unit"] or unit
+            observed_for_eval = _convert_value(observed, unit, eval_unit)
+            if observed_for_eval is None:
+                if status_rollup == "PASS":
+                    status_rollup = "WARNING"
+                    risk_rollup = "UNIT_MISMATCH"
+                continue
+            status, risk = evaluate_status(observed_for_eval, std["limit_min"], std["limit_max"])
             if status == "FAIL":
                 status_rollup = "FAIL"
                 risk_rollup = risk

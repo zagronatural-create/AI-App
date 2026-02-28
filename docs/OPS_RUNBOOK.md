@@ -11,6 +11,9 @@ Operational setup for scheduler-safe daily automation cycle and watchdog recover
 - `sql/migrations/005_anomaly_events.sql`
 - `sql/migrations/006_automation_runs.sql`
 - `sql/migrations/007_automation_lock.sql`
+- `sql/migrations/010_regulatory_threshold_master.sql`
+- `sql/migrations/011_regulatory_coverage_profile.sql`
+- `sql/migrations/012_regulatory_coverage_profile_v2.sql`
 3. `uvicorn` process (or service manager) is healthy.
 4. Security config in `.env` reviewed:
 - `AUTH_ENABLED=true`

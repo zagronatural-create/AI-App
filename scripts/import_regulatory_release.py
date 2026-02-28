@@ -94,6 +94,7 @@ def main() -> int:
     parser.add_argument("--approve", action="store_true")
     parser.add_argument("--approval-notes", default="")
     parser.add_argument("--publish", action="store_true")
+    parser.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args()
 
     if not args.token:
@@ -159,6 +160,18 @@ def main() -> int:
     release_id = imported.get("release_id")
     if not release_id:
         print("Import response missing release_id", file=sys.stderr)
+        return 1
+
+    coverage_url = f"{args.base_url.rstrip('/')}/api/v1/compliance/regulatory/releases/{release_id}/coverage"
+    cov_code, coverage = _json_request(coverage_url, token=args.token, method="GET")
+    print(json.dumps({"step": "coverage", "status_code": cov_code, "response": coverage}, indent=2))
+    if cov_code != 200:
+        return 1
+    if (args.approve or args.publish) and not coverage.get("ready_for_approval", False) and not args.allow_incomplete:
+        print(
+            "Coverage check failed; refusing approve/publish. Use --allow-incomplete to override.",
+            file=sys.stderr,
+        )
         return 1
 
     if args.publish and not args.approve:

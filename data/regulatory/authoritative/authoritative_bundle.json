@@ -1,0 +1,50 @@
+[
+  {
+    "standard_name": "FSSAI",
+    "release_code": "FSSAI-CTR-VI-2022-CORE",
+    "document_title": "FSSAI Compendium of Food Safety and Standards (Contaminants, Toxins and Residues), Version VI",
+    "document_url": "https://fssai.gov.in/upload/uploadfiles/files/Compendium_Contaminants_Regulations_28_01_2022.pdf",
+    "publication_date": "2022-01-27",
+    "effective_from": "2022-01-27",
+    "jurisdiction": "India",
+    "source_authority": "FSSAI",
+    "notes": "Core contaminants mapped for TRAD-NUTRI-500G from cereal-product rows.",
+    "csv_file": "data/regulatory/authoritative/fssai_ctr_2022_v6.csv"
+  },
+  {
+    "standard_name": "EU",
+    "release_code": "EU-2023-915-CONSOL-2025-01-01-CORE",
+    "document_title": "Commission Regulation (EU) 2023/915 on maximum levels for certain contaminants in food",
+    "document_url": "https://eur-lex.europa.eu/eli/reg/2023/915/2025-01-01/eng",
+    "publication_date": "2023-04-25",
+    "effective_from": "2023-05-25",
+    "jurisdiction": "European Union",
+    "source_authority": "European Commission",
+    "notes": "Uses consolidated text as of 2025-01-01 and cereal-category limits.",
+    "csv_file": "data/regulatory/authoritative/eu_2023_915_consolidated_2025_01_01.csv"
+  },
+  {
+    "standard_name": "CODEX",
+    "release_code": "CODEX-CXS193-AMD2023-CORE",
+    "document_title": "Codex General Standard for Contaminants and Toxins in Food and Feed (CXS 193-1995), amended through 2023",
+    "document_url": "https://www.fao.org/fao-who-codexalimentarius/sh-proxy/en/?lnk=1&url=https%3A%2F%2Fworkspace.fao.org%2Fsites%2Fcodex%2FStandards%2FCXS+193-1995%2FCXS_193e.pdf",
+    "publication_date": "2023-12-31",
+    "effective_from": "2023-12-31",
+    "jurisdiction": "Codex Alimentarius",
+    "source_authority": "Codex Alimentarius Commission",
+    "notes": "Commodity mapping uses cereal-grain and maize-derived cereal rows for core contaminants.",
+    "csv_file": "data/regulatory/authoritative/codex_cxs_193_amd_2023.csv"
+  },
+  {
+    "standard_name": "HACCP_INTERNAL",
+    "release_code": "HACCP-INTERNAL-2026Q1-CORE",
+    "document_title": "Internal HACCP Critical Limits Register (Q1 2026)",
+    "document_url": "",
+    "publication_date": "2026-01-15",
+    "effective_from": "2026-02-01",
+    "jurisdiction": "Internal",
+    "source_authority": "Internal HACCP Board",
+    "notes": "Internal critical limits used for process and microbiological controls.",
+    "csv_file": "data/regulatory/authoritative/haccp_internal_2026_q1.csv"
+  }
+]

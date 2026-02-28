@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 import uuid
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
@@ -9,11 +10,14 @@ from app.core.auth import AuthUser, require_roles
 from app.db.session import get_db
 from app.schemas.regulatory import ThresholdReleaseApproveIn, ThresholdReleasePublishIn
 from app.services.regulatory import (
+    active_coverage_report,
     approve_threshold_release,
     get_threshold_release,
     import_threshold_release,
+    list_parameter_requirements,
     list_threshold_releases,
     publish_threshold_release,
+    release_coverage_report,
     release_summary_for_ui,
 )
 
@@ -102,6 +106,55 @@ def release_detail(
     if not row:
         raise HTTPException(status_code=404, detail="Release not found")
     return row
+
+
+@router.get("/releases/{release_id}/coverage")
+def release_coverage(
+    release_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: AuthUser = Depends(
+        require_roles("viewer", "qa_analyst", "qa_manager", "compliance_manager", "admin")
+    ),
+) -> dict:
+    _ = current_user
+    try:
+        return release_coverage_report(db, release_id=str(release_id))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/coverage/active")
+def active_coverage(
+    as_of: str | None = Query(default=None, description="YYYY-MM-DD"),
+    product_category: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+    current_user: AuthUser = Depends(
+        require_roles("viewer", "qa_analyst", "qa_manager", "compliance_manager", "admin")
+    ),
+) -> dict:
+    _ = current_user
+    try:
+        as_of_date = date.fromisoformat(as_of) if as_of else None
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid as_of date format. Use YYYY-MM-DD.") from exc
+    return active_coverage_report(db, as_of=as_of_date, product_category=product_category)
+
+
+@router.get("/coverage/requirements")
+def coverage_requirements(
+    as_of: str | None = Query(default=None, description="YYYY-MM-DD"),
+    product_category: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+    current_user: AuthUser = Depends(
+        require_roles("viewer", "qa_analyst", "qa_manager", "compliance_manager", "admin")
+    ),
+) -> dict:
+    _ = current_user
+    try:
+        as_of_date = date.fromisoformat(as_of) if as_of else None
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid as_of date format. Use YYYY-MM-DD.") from exc
+    return list_parameter_requirements(db, as_of=as_of_date, product_category=product_category)
 
 
 @router.post("/releases/{release_id}/approve")

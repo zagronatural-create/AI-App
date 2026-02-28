@@ -1,0 +1,5 @@
+product_category,parameter_name,parameter_code,unit,limit_min,limit_max,severity,source_clause,remarks
+TRAD-NUTRI-500G,Aflatoxins Total,AFLA_TOTAL,ug/kg,,4,critical,"Annex I 1.1.12: Cereals and products derived from cereals - sum of B1+B2+G1+G2","Commission Regulation (EU) 2023/915 consolidated 2025-01-01"
+TRAD-NUTRI-500G,Aflatoxin B1,AFLA_B1,ug/kg,,2,critical,"Annex I 1.1.12: Cereals and products derived from cereals - Aflatoxin B1","Commission Regulation (EU) 2023/915 consolidated 2025-01-01"
+TRAD-NUTRI-500G,Lead,LEAD,mg/kg,,0.2,critical,"Annex I 3.1.11: Cereals (excluding buckwheat, canihua and quinoa)","Commission Regulation (EU) 2023/915 consolidated 2025-01-01"
+TRAD-NUTRI-500G,Cadmium,CADMIUM,mg/kg,,0.1,critical,"Annex I 3.2.12.1: Cereals except barley/rye/rice/quinoa/wheat-bran/wheat-gluten/durum/wheat-germ","Commission Regulation (EU) 2023/915 consolidated 2025-01-01"

@@ -1,0 +1,4 @@
+product_category,parameter_name,parameter_code,unit,limit_min,limit_max,severity,source_clause,remarks
+TRAD-NUTRI-500G,Aflatoxins Total,AFLA_TOTAL,ug/kg,,10,critical,"Section 2.1.2 (Aflatoxins): Flour, meal, semolina and flakes derived from maize","Codex CXS 193-1995 amended through 2023"
+TRAD-NUTRI-500G,Lead,LEAD,mg/kg,,0.2,critical,"Section 2.1.7 (Lead): Cereal grains excluding buckwheat, canihua and quinoa","Codex CXS 193-1995 amended through 2023"
+TRAD-NUTRI-500G,Cadmium,CADMIUM,mg/kg,,0.1,critical,"Section 2.1.6 (Cadmium): Cereal grains excluding wheat and rice (and bran/germ)","Codex CXS 193-1995 amended through 2023"
