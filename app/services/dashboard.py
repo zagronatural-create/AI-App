@@ -20,20 +20,28 @@ def get_overview(db: Session) -> dict:
     compliance = db.execute(
         text(
             """
-            WITH cmp AS (
+            WITH latest_q AS (
+              SELECT q.batch_id, q.parameter_code, q.observed_value, q.tested_at, q.created_at, q.test_id,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY q.batch_id, q.parameter_code
+                       ORDER BY COALESCE(q.tested_at, q.created_at) DESC, q.created_at DESC, q.test_id DESC
+                     ) AS rn
+              FROM quality_test_records q
+            ), cmp AS (
               SELECT q.batch_id,
                      CASE
                        WHEN MAX(CASE WHEN q.observed_value > COALESCE(t.limit_max, q.observed_value) THEN 1 ELSE 0 END) = 1 THEN 'FAIL'
                        WHEN MAX(CASE WHEN q.observed_value >= COALESCE(t.limit_max, q.observed_value) * 0.9 THEN 1 ELSE 0 END) = 1 THEN 'WARNING'
                        ELSE 'PASS'
                      END AS status
-              FROM quality_test_records q
+              FROM latest_q q
               LEFT JOIN production_batches b ON b.batch_id = q.batch_id
               LEFT JOIN compliance_thresholds t
                 ON t.parameter_code = q.parameter_code
                AND t.product_category = b.product_sku
                AND t.effective_from <= COALESCE(q.tested_at::date, current_date)
                AND (t.effective_to IS NULL OR t.effective_to >= COALESCE(q.tested_at::date, current_date))
+              WHERE q.rn = 1
               GROUP BY q.batch_id
             )
             SELECT

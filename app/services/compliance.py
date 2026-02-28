@@ -70,16 +70,27 @@ def evaluate_status(observed: float, limit_min: Decimal | None, limit_max: Decim
 def batch_comparison(db: Session, batch_code: str) -> list[dict]:
     query = text(
         """
+        WITH latest_q AS (
+          SELECT q.parameter_name, q.parameter_code, q.observed_value, q.unit,
+                 q.tested_at, q.created_at, q.test_id,
+                 ROW_NUMBER() OVER (
+                   PARTITION BY q.parameter_code
+                   ORDER BY COALESCE(q.tested_at, q.created_at) DESC, q.created_at DESC, q.test_id DESC
+                 ) AS rn
+          FROM quality_test_records q
+          JOIN production_batches b ON b.batch_id = q.batch_id
+          WHERE b.batch_code = :batch_code
+        )
         SELECT q.parameter_name, q.parameter_code, q.observed_value, q.unit,
                t.standard_name, t.limit_min, t.limit_max, t.unit AS limit_unit
-        FROM quality_test_records q
-        JOIN production_batches b ON b.batch_id = q.batch_id
+        FROM latest_q q
+        JOIN production_batches b ON b.batch_code = :batch_code
         LEFT JOIN compliance_thresholds t
           ON t.parameter_code = q.parameter_code
          AND t.product_category = b.product_sku
          AND t.effective_from <= COALESCE(q.tested_at::date, current_date)
          AND (t.effective_to IS NULL OR t.effective_to >= COALESCE(q.tested_at::date, current_date))
-        WHERE b.batch_code = :batch_code
+        WHERE q.rn = 1
         ORDER BY q.parameter_name;
         """
     )
