@@ -1,0 +1,51 @@
+services:
+  - type: cron
+    name: ai-app-kpi-trend-daily
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    schedule: "30 1 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 scripts/kpi_trend_report.py --base-url "$BASE_URL" --admin-token "$ADMIN_TOKEN" --out-dir storage/reports/kpi-trends
+    envVars:
+      - key: BASE_URL
+        value: https://ai-app-qgrl.onrender.com
+      - key: ADMIN_TOKEN
+        sync: false
+
+  - type: cron
+    name: ai-app-compliance-pack-daily
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    schedule: "45 1 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash scripts/compliance_pack_scheduler.sh
+    envVars:
+      - key: BASE_URL
+        value: https://ai-app-qgrl.onrender.com
+      - key: QA_TOKEN
+        sync: false
+      - key: VIEWER_TOKEN
+        sync: false
+      - key: WINDOW_HOURS
+        value: "24"
+      - key: LIMIT
+        value: "10000"
+      - key: OUT_DIR
+        value: storage/reports/compliance-packs
+
+  - type: cron
+    name: ai-app-supplier-calibration-weekly
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    schedule: "15 2 * * 1"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 scripts/supplier_model_calibration.py --database-url "$DATABASE_URL" --lookback-days 90 --min-deliveries 3 --issue-threshold 0.10 --risk-threshold 0.66 --out-dir storage/reports/model-calibration
+    envVars:
+      - key: DATABASE_URL
+        sync: false
