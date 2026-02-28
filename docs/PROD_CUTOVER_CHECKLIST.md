@@ -131,11 +131,20 @@ Rollback actions:
 
 ## 10) Sign-off log
 Record before final declaration:
-- Deployment timestamp (UTC):
-- Release commit SHA:
-- Release tag:
-- Release gate report path:
+- Deployment timestamp (UTC): `2026-02-28T10:08:33Z` (final live deploy + gate verification window)
+- Release commit SHA: `9902729`
+- Release tag: `release-gate-pass-2026-02-23` (baseline tag), plus current `main` with prod checklist/signoff updates
+- Release gate report path: `storage/reports/render-prod/release_gate_20260228T100833Z.txt`
+- Security regression report path: `storage/reports/render-prod/security_regression_20260228T100833Z.txt`
+- Go-live acceptance report path: `storage/reports/render-prod/go_live_acceptance_20260228T100833Z.json`
 - Recall drill result:
+  - Endpoint: `POST /api/v1/recall/simulate`
+  - Batch: `BATCH-2026-02-0012`
+  - Outcome: `impacted_customers_count=2`, `impacted_qty=650.0`, `suppliers_count=2`, `finished_lots_count=1`
+  - Timestamp (UTC): `2026-02-28T10:10:52Z`
 - Audit pack verify result:
-- Approver names (Engineering, QA, Operations):
-
+  - Pack ID: `700e27f7-6284-4f3c-9088-ee11255eb39e`
+  - Verify outcome: `valid=true`, `missing_files=[]`, `mismatches=[]`
+  - Download check: `checksums.json` HTTP `200`
+  - Timestamp (UTC): `2026-02-28T10:10:53Z`
+- Approver names (Engineering, QA, Operations): `Pending manual sign-off entry`
