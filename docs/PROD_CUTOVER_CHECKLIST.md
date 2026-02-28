@@ -147,4 +147,20 @@ Record before final declaration:
   - Verify outcome: `valid=true`, `missing_files=[]`, `mismatches=[]`
   - Download check: `checksums.json` HTTP `200`
   - Timestamp (UTC): `2026-02-28T10:10:53Z`
+- Re-validation timestamp (UTC): `2026-02-28T10:23:37Z` (post-token-rotation production gate run)
+- Re-validation commit SHA on `main`: `377ba7b`
+- Re-validation release gate report path: `storage/reports/render-prod/release_gate_20260228T102337Z.txt`
+- Re-validation security regression report path: `storage/reports/render-prod/security_regression_20260228T102337Z.txt`
+- Re-validation go-live acceptance report path: `storage/reports/render-prod/go_live_acceptance_20260228T102337Z.json`
+- Re-validation recall drill result:
+  - Endpoint: `POST /api/v1/recall/simulate`
+  - Batch: `BATCH-2026-02-0012`
+  - Outcome: `impacted_customers_count=2`, `impacted_qty=650.0`, `suppliers_count=2`, `finished_lots_count=1`, `HTTP 200`
+  - Trace response time: `0.668536s` (target `< 10s` met)
+  - Timestamp (UTC): `2026-02-28T10:25:20Z`
+- Re-validation audit pack verify result:
+  - Pack ID: `7abae6f0-aac7-49b9-8d41-3bbde5cd44b2`
+  - Verify outcome: `valid=true`, `missing_files=[]`, `mismatches=[]`
+  - Download check: `checksums.json` HTTP `200`
+  - Timestamp (UTC): `2026-02-28T10:23:51Z`
 - Approver names (Engineering, QA, Operations): `Pending manual sign-off entry`
