@@ -17,6 +17,9 @@ venv/
 # Local env files
 .env
 .env.local
+staging.env
+render.prod.env
+*.swp
 
 # Runtime/output artifacts
 storage/reports/
