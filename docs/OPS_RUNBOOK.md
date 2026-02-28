@@ -165,6 +165,26 @@ Cron examples:
 35 6 * * 1 BASE_URL=https://<your-prod-api-domain> QA_TOKEN=<qa-token> VIEWER_TOKEN=<viewer-token> WINDOW_HOURS=168 /Users/Raghunath/Documents/AI\ APP/scripts/compliance_pack_scheduler.sh >> /tmp/supply_intel_compliance_pack_weekly.log 2>&1
 ```
 
+## Zero-cost scheduler alternative (GitHub Actions)
+If Render Cron billing is not enabled, use these workflows in `.github/workflows/`:
+- `prod-kpi-trend.yml` (daily)
+- `prod-compliance-pack.yml` (daily)
+- `prod-supplier-calibration.yml` (weekly)
+
+Required GitHub repository secrets:
+- `PROD_BASE_URL` = `https://<your-prod-api-domain>`
+- `PROD_ADMIN_TOKEN` = production admin API token
+- `PROD_QA_TOKEN` = production QA API token
+- `PROD_VIEWER_TOKEN` = production viewer API token
+- `PROD_DATABASE_URL` = production database URL (`postgresql+psycopg://...`)
+
+Manual trigger path:
+1. GitHub repo -> **Actions**
+2. Select workflow (`Prod KPI Trend`, `Prod Compliance Pack`, or `Prod Supplier Calibration`)
+3. Click **Run workflow**
+
+Artifacts from each run are available under the workflow run summary in GitHub Actions.
+
 ## Staging release gate
 1. Copy and update staging env template:
 ```bash

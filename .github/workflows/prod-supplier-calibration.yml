@@ -1,0 +1,49 @@
+name: Prod Supplier Calibration
+
+on:
+  schedule:
+    - cron: "15 2 * * 1"
+  workflow_dispatch:
+
+jobs:
+  supplier-calibration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate required secrets
+        run: |
+          test -n "$PROD_DATABASE_URL"
+
+      - name: Run supplier model calibration
+        run: |
+          python3 scripts/supplier_model_calibration.py \
+            --database-url "$PROD_DATABASE_URL" \
+            --lookback-days 90 \
+            --min-deliveries 3 \
+            --issue-threshold 0.10 \
+            --risk-threshold 0.66 \
+            --out-dir storage/reports/model-calibration
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-supplier-calibration
+          path: storage/reports/model-calibration/**
+

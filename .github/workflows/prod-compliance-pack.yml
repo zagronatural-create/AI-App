@@ -1,0 +1,53 @@
+name: Prod Compliance Pack
+
+on:
+  schedule:
+    - cron: "45 1 * * *"
+  workflow_dispatch:
+
+jobs:
+  compliance-pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROD_BASE_URL: ${{ secrets.PROD_BASE_URL }}
+      PROD_QA_TOKEN: ${{ secrets.PROD_QA_TOKEN }}
+      PROD_VIEWER_TOKEN: ${{ secrets.PROD_VIEWER_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate required secrets
+        run: |
+          test -n "$PROD_BASE_URL"
+          test -n "$PROD_QA_TOKEN"
+          test -n "$PROD_VIEWER_TOKEN"
+
+      - name: Run compliance pack scheduler
+        run: |
+          BASE_URL="$PROD_BASE_URL" \
+          QA_TOKEN="$PROD_QA_TOKEN" \
+          VIEWER_TOKEN="$PROD_VIEWER_TOKEN" \
+          WINDOW_HOURS=24 \
+          LIMIT=10000 \
+          OUT_DIR=storage/reports/compliance-packs \
+          ./scripts/compliance_pack_scheduler.sh
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-compliance-pack
+          path: storage/reports/compliance-packs/**
+
