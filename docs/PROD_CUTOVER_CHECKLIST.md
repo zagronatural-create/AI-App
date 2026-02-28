@@ -163,4 +163,9 @@ Record before final declaration:
   - Verify outcome: `valid=true`, `missing_files=[]`, `mismatches=[]`
   - Download check: `checksums.json` HTTP `200`
   - Timestamp (UTC): `2026-02-28T10:23:51Z`
+- Post-rotation final validation timestamp (UTC): `2026-02-28T10:38:51Z` (live service with rotated API tokens)
+- Post-rotation release gate report path: `storage/reports/render-prod/release_gate_20260228T103851Z.txt`
+- Post-rotation security regression report path: `storage/reports/render-prod/security_regression_20260228T103851Z.txt`
+- Post-rotation go-live acceptance report path: `storage/reports/render-prod/go_live_acceptance_20260228T103851Z.json`
+- Post-rotation acceptance summary: `security=7/7`, `go_live=12/12`, `audit_pack_valid=true` (Pack ID `35e882f9-4bb0-4c0c-9a7c-b8c1aff23909`)
 - Approver names (Engineering, QA, Operations): `Raghunath Kadam (Engineering), Raghunath Kadam (QA), Raghunath Kadam (Operations)`
