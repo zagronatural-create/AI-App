@@ -66,6 +66,7 @@ This system supports validation and documentation workflows. It **does not issue
 - `GET /api/v1/compliance/labs/reports/jobs/{job_id}` (job status)
 - `GET /api/v1/compliance/labs/reports/{batch_code}/versions`
 - `GET /api/v1/compliance/batch/{batch_code}/comparison`
+- `GET /api/v1/compliance/batch/{batch_code}/comparison/export.csv`
 - `GET /api/v1/compliance/batch/{batch_code}/export-readiness`
 - `POST /api/v1/compliance/regulatory/releases/import-csv`
 - `GET /api/v1/compliance/regulatory/releases`

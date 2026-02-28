@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import csv
+from datetime import datetime, timezone
+from io import StringIO
+
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.auth import AuthUser, require_roles
@@ -116,6 +121,51 @@ def get_batch_comparison(batch_code: str, db: Session = Depends(get_db)) -> dict
         },
         "disclaimer": "AI-assisted compliance intelligence only; final regulatory decisions remain with authorized teams.",
     }
+
+
+@router.get("/batch/{batch_code}/comparison/export.csv")
+def export_batch_comparison_csv(
+    batch_code: str,
+    db: Session = Depends(get_db),
+    current_user: AuthUser = Depends(require_roles("viewer", "qa_analyst", "qa_manager", "compliance_manager", "admin")),
+) -> StreamingResponse:
+    _ = current_user
+    rows = batch_comparison(db, batch_code)
+    if not rows:
+        raise HTTPException(status_code=404, detail="No comparison data found for batch")
+
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "parameter_code",
+            "batch_value",
+            "fssai_limit",
+            "eu_limit",
+            "codex_limit",
+            "haccp_limit",
+            "status",
+            "risk_flag",
+        ]
+    )
+    for row in rows:
+        writer.writerow(
+            [
+                row.get("parameter_code"),
+                row.get("batch_value"),
+                row.get("fssai_limit"),
+                row.get("eu_limit"),
+                row.get("codex_limit"),
+                row.get("haccp_limit"),
+                row.get("status"),
+                row.get("risk_flag"),
+            ]
+        )
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    filename = f"batch_comparison_{batch_code}_{ts}.csv"
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers=headers)
 
 
 @router.get("/batch/{batch_code}/export-readiness")

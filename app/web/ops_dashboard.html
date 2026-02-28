@@ -25,13 +25,13 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'IBM Plex Sans', sans-serif;
+      font-family: "IBM Plex Sans", sans-serif;
       background: radial-gradient(circle at top right, #d8ebe5 0%, var(--bg) 38%, #f7faf7 100%);
       color: var(--text);
     }
 
     .wrap {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -41,7 +41,7 @@
       justify-content: space-between;
       gap: 12px;
       align-items: flex-end;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .title {
@@ -63,17 +63,38 @@
       color: var(--muted);
       font-size: 0.82rem;
       border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .badge.ok {
+      color: var(--ok);
+      border-color: #96c8a4;
+      background: #e9f7ed;
+    }
+
+    .badge.warn {
+      color: #8a4809;
+      border-color: #f1cfad;
+      background: #fff5eb;
+    }
+
+    .badge.bad {
+      color: #8f1c1c;
+      border-color: #f2c0c0;
+      background: #fff0f0;
     }
 
     .header-actions {
       display: flex;
       gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
       gap: 14px;
     }
 
@@ -85,21 +106,28 @@
       padding: 14px;
     }
 
-    .kpi { grid-column: span 3; }
-    .wide { grid-column: span 6; }
-    .full { grid-column: span 12; }
-
-    .kpi h3, .card h3 {
+    .card h3 {
       margin: 0 0 8px;
       font-size: 0.9rem;
       color: var(--muted);
       font-weight: 600;
     }
 
+    .card .note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .kpi { grid-column: span 3; }
+    .wide { grid-column: span 6; }
+    .full { grid-column: span 12; }
+
     .kpi .value {
       font-size: 1.8rem;
       font-weight: 700;
       margin: 0;
+      letter-spacing: 0.01em;
     }
 
     .row {
@@ -114,19 +142,10 @@
 
     .row:first-child { border-top: 0; }
 
-    .dot {
-      display: inline-flex;
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      margin-right: 6px;
+    .alerts {
+      max-height: 340px;
+      overflow: auto;
     }
-
-    .dot.ok { background: var(--ok); }
-    .dot.warn { background: var(--warn); }
-    .dot.bad { background: var(--danger); }
-
-    .alerts { max-height: 320px; overflow: auto; }
 
     .alert-item {
       border: 1px solid var(--border);
@@ -147,30 +166,147 @@
       align-items: center;
       font-size: 0.85rem;
       color: var(--muted);
+      flex-wrap: wrap;
     }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 6px 0 10px;
+    }
+
+    .toolbar label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    input, select {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      min-width: 170px;
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.86rem;
+    }
+
+    input[type="number"] { min-width: 90px; }
 
     button {
       border: 1px solid var(--accent);
       color: var(--accent);
       background: #eefaf8;
       border-radius: 8px;
-      font-size: 0.8rem;
-      padding: 5px 9px;
+      font-size: 0.82rem;
+      padding: 6px 10px;
       cursor: pointer;
+      font-family: inherit;
     }
 
     button:hover { background: #def3f0; }
 
-    .muted { color: var(--muted); font-size: 0.85rem; }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #eff3f2;
+      color: var(--muted);
+      border-color: var(--border);
+    }
 
-    @media (max-width: 900px) {
+    .muted {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    .error-banner {
+      border-color: #f2c0c0;
+      background: #fff1f1;
+      color: #8f1c1c;
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.76rem;
+      padding: 2px 8px;
+      letter-spacing: 0.02em;
+      font-weight: 600;
+    }
+
+    .status.pass {
+      color: var(--ok);
+      border-color: #96c8a4;
+      background: #e9f7ed;
+    }
+
+    .status.warning {
+      color: #8a4809;
+      border-color: #f1cfad;
+      background: #fff5eb;
+    }
+
+    .status.fail {
+      color: #8f1c1c;
+      border-color: #f2c0c0;
+      background: #fff0f0;
+    }
+
+    .status.na {
+      color: var(--muted);
+      border-color: var(--border);
+      background: #f7faf8;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th, td {
+      border-top: 1px solid var(--border);
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      border-top: 0;
+      background: #f7fbf8;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 300px;
+      background: #fff;
+    }
+
+    @media (max-width: 980px) {
       .kpi { grid-column: span 6; }
       .wide { grid-column: span 12; }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 680px) {
       .kpi { grid-column: span 12; }
       .header { flex-direction: column; align-items: flex-start; }
+      .header-actions { justify-content: flex-start; }
+      input { min-width: 150px; }
     }
   </style>
 </head>
@@ -183,9 +319,13 @@
       </div>
       <div class="header-actions">
         <button onclick="setAuthToken()">Set Token</button>
+        <div class="badge warn" id="token-state">Token not set</div>
+        <div class="badge" id="role-state">Role: -</div>
         <div class="badge" id="last-refresh">Refreshing...</div>
       </div>
     </div>
+
+    <div class="card error-banner" id="error-banner"></div>
 
     <div class="grid">
       <div class="card kpi"><h3>Open Alerts</h3><p class="value" id="kpi-open-alerts">-</p></div>
@@ -195,29 +335,76 @@
 
       <div class="card wide">
         <h3>Automation Status</h3>
+        <p class="note">Tracks daily automation cycle health for risk, anomaly, and KPI updates.</p>
         <div id="automation-status"></div>
       </div>
 
       <div class="card wide">
         <h3>Compliance Snapshot</h3>
+        <p class="note">Batch-level PASS/WARNING/FAIL distribution from latest measurements.</p>
         <div id="compliance-status"></div>
       </div>
 
       <div class="card full">
+        <h3>Batch Comparison Drilldown</h3>
+        <p class="note">Compare one batch across FSSAI, EU, Codex, and internal HACCP limits.</p>
+        <div class="toolbar">
+          <label>Batch Code
+            <input id="batch-code-input" value="BATCH-2026-02-0012" />
+          </label>
+          <button onclick="loadBatchComparisonFromInput()">Load Comparison</button>
+          <button id="btn-export-batch-csv" onclick="downloadBatchComparisonCsv()">Export Comparison CSV</button>
+          <button id="btn-export-readiness-json" onclick="downloadExportReadinessJson()">Export Readiness JSON</button>
+        </div>
+        <div id="batch-summary"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Batch Value</th>
+                <th>FSSAI</th>
+                <th>EU</th>
+                <th>Codex</th>
+                <th>HACCP Internal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card full">
         <h3>Open CCP Alerts</h3>
+        <p class="note">Critical control point deviations requiring operator acknowledgement.</p>
         <div class="alerts" id="alerts-list"></div>
       </div>
 
       <div class="card full">
         <h3>Recent Audit Events</h3>
+        <p class="note">Immutable event log for traceability and audit automation checks.</p>
+        <div class="toolbar">
+          <label>From
+            <input type="datetime-local" id="audit-from" />
+          </label>
+          <label>To
+            <input type="datetime-local" id="audit-to" />
+          </label>
+          <label>Limit
+            <input type="number" id="audit-limit" value="1000" min="1" max="10000" />
+          </label>
+          <button id="btn-export-audit-csv" onclick="downloadAuditEventsCsv()">Export Audit CSV</button>
+        </div>
         <div class="alerts" id="audit-list"></div>
       </div>
 
       <div class="card full">
         <h3>Audit Packs</h3>
+        <p class="note">Generate and verify package bundles for compliance and external review sharing.</p>
         <div class="row">
           <span>Generate from current month</span>
-          <button onclick="generateAuditPack()">Generate Pack</button>
+          <button id="btn-generate-pack" onclick="generateAuditPack()">Generate Pack</button>
         </div>
         <div class="alerts" id="packs-list"></div>
       </div>
@@ -225,8 +412,27 @@
   </div>
 
   <script>
+    const state = {
+      user: null,
+      selectedBatch: "BATCH-2026-02-0012",
+    };
+
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function esc(value) {
+      const raw = String(value ?? "");
+      return raw
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function getToken() {
-      return localStorage.getItem('ops_api_token') || '';
+      return localStorage.getItem("ops_api_token") || "";
     }
 
     function getAuthHeaders() {
@@ -235,99 +441,218 @@
       return { Authorization: `Bearer ${token}` };
     }
 
+    function parseTokenInput(raw) {
+      const trimmed = raw.trim();
+      if (!trimmed) return { token: "" };
+
+      const tokenOnly = trimmed.replace(/^Bearer\s+/i, "").trim();
+      if (tokenOnly.startsWith("{")) {
+        try {
+          const parsed = JSON.parse(tokenOnly);
+          const hasTokenMapShape = Object.values(parsed).some((v) => {
+            return v && typeof v === "object" && "roles" in v && "user_id" in v;
+          });
+          if (hasTokenMapShape) {
+            return {
+              error: "Detected API_TOKEN_MAP_JSON. Paste one token only, not the full JSON map.",
+            };
+          }
+        } catch (err) {
+          void err;
+        }
+      }
+      return { token: tokenOnly };
+    }
+
     function setAuthToken() {
       const current = getToken();
-      const input = prompt('Paste API token (Bearer). Leave empty to clear.', current);
+      const input = prompt("Paste API token (Bearer). Leave empty to clear.", current);
       if (input === null) return;
-      const value = input.trim();
-      if (!value) {
-        localStorage.removeItem('ops_api_token');
+      const parsed = parseTokenInput(input);
+      if (parsed.error) {
+        alert(parsed.error);
+        return;
+      }
+      if (!parsed.token) {
+        localStorage.removeItem("ops_api_token");
       } else {
-        localStorage.setItem('ops_api_token', value);
+        localStorage.setItem("ops_api_token", parsed.token);
       }
       refresh();
     }
 
-    async function getJson(url) {
-      const res = await fetch(url, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+    async function fetchJson(url, options = {}) {
+      const headers = { ...(options.headers || {}), ...getAuthHeaders() };
+      const res = await fetch(url, { ...options, headers });
+      if (!res.ok) {
+        throw new Error(`${url} -> ${res.status}`);
+      }
       return res.json();
     }
 
-    function byId(id) {
-      return document.getElementById(id);
+    async function fetchBlob(url, options = {}) {
+      const headers = { ...(options.headers || {}), ...getAuthHeaders() };
+      const res = await fetch(url, { ...options, headers });
+      if (!res.ok) {
+        throw new Error(`${url} -> ${res.status}`);
+      }
+      return res.blob();
+    }
+
+    function hasAnyRole(roles) {
+      if (!state.user || !Array.isArray(state.user.roles)) return false;
+      if (state.user.roles.includes("admin")) return true;
+      return roles.some((role) => state.user.roles.includes(role));
+    }
+
+    function updateIdentityUI() {
+      const tokenBadge = byId("token-state");
+      const roleBadge = byId("role-state");
+
+      if (!state.user) {
+        tokenBadge.textContent = "Token missing or invalid";
+        tokenBadge.className = "badge bad";
+        roleBadge.textContent = "Role: -";
+        roleBadge.className = "badge";
+        return;
+      }
+
+      tokenBadge.textContent = `User: ${state.user.user_id}`;
+      tokenBadge.className = "badge ok";
+      const rolesText = state.user.roles && state.user.roles.length ? state.user.roles.join(", ") : "none";
+      roleBadge.textContent = `Role: ${rolesText}`;
+      roleBadge.className = "badge";
+    }
+
+    function updateActionVisibility() {
+      const canAck = hasAnyRole(["qa_manager", "compliance_manager", "admin"]);
+      const canGeneratePack = hasAnyRole(["qa_manager", "compliance_manager", "admin"]);
+      const canExportAudit = hasAnyRole(["viewer", "qa_manager", "compliance_manager", "admin"]);
+      const canExportComparison = hasAnyRole(["viewer", "qa_analyst", "qa_manager", "compliance_manager", "admin"]);
+
+      byId("btn-generate-pack").disabled = !canGeneratePack;
+      byId("btn-export-audit-csv").disabled = !canExportAudit;
+      byId("btn-export-batch-csv").disabled = !canExportComparison;
+      byId("btn-export-readiness-json").disabled = !canExportComparison;
+
+      const ackButtons = document.querySelectorAll("[data-role-action='ack-alert']");
+      ackButtons.forEach((btn) => {
+        btn.disabled = !canAck;
+      });
+    }
+
+    function showError(message) {
+      const banner = byId("error-banner");
+      banner.style.display = "block";
+      banner.textContent = message;
+    }
+
+    function clearError() {
+      const banner = byId("error-banner");
+      banner.style.display = "none";
+      banner.textContent = "";
     }
 
     function renderRows(containerId, rows) {
       const root = byId(containerId);
-      root.innerHTML = rows.map(([label, value]) => `
-        <div class="row"><span>${label}</span><strong>${value ?? "-"}</strong></div>
-      `).join("");
+      root.innerHTML = rows
+        .map(([label, value]) => {
+          return `<div class="row"><span>${esc(label)}</span><strong>${esc(value ?? "-")}</strong></div>`;
+        })
+        .join("");
+    }
+
+    function statusChip(status) {
+      const s = String(status || "N/A").toUpperCase();
+      let klass = "na";
+      if (s === "PASS") klass = "pass";
+      if (s === "WARNING") klass = "warning";
+      if (s === "FAIL") klass = "fail";
+      return `<span class="status ${klass}">${esc(s)}</span>`;
     }
 
     async function ackAlert(alertId) {
-      const who = prompt("Acknowledge by (user id):", "qa.manager");
+      if (!hasAnyRole(["qa_manager", "compliance_manager", "admin"])) {
+        alert("Your role cannot acknowledge alerts.");
+        return;
+      }
+      const who = prompt("Acknowledge by (user id):", state.user?.user_id || "qa.manager");
       if (!who) return;
       const res = await fetch(`/api/v1/ccp/alerts/${alertId}/ack`, {
-        method: 'PATCH',
-        headers: {'Content-Type': 'application/json', ...getAuthHeaders()},
-        body: JSON.stringify({ acknowledged_by: who })
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ acknowledged_by: who.trim() }),
       });
       if (!res.ok) {
-        alert('Failed to acknowledge alert');
+        alert("Failed to acknowledge alert");
         return;
       }
       await refresh();
     }
 
     function renderAlerts(rows) {
-      const root = byId('alerts-list');
+      const root = byId("alerts-list");
       if (!rows.length) {
         root.innerHTML = '<p class="muted">No open alerts.</p>';
         return;
       }
-      root.innerHTML = rows.map((a) => `
-        <div class="alert-item ${a.severity}">
-          <div class="alert-head">
-            <span><strong>${a.alert_type}</strong> | ${a.batch_code ?? 'N/A'}</span>
-            <span>${new Date(a.detected_at).toLocaleString()}</span>
-          </div>
-          <div style="margin-top:6px; font-size:0.9rem;">${a.title}</div>
-          <div class="muted" style="margin-top:4px;">${a.message}</div>
-          <div style="margin-top:8px;"><button onclick="ackAlert('${a.alert_id}')">Acknowledge</button></div>
-        </div>
-      `).join('');
+      const canAck = hasAnyRole(["qa_manager", "compliance_manager", "admin"]);
+      root.innerHTML = rows
+        .map((a) => {
+          return `
+            <div class="alert-item ${esc(a.severity)}">
+              <div class="alert-head">
+                <span><strong>${esc(a.alert_type)}</strong> | ${esc(a.batch_code || "N/A")}</span>
+                <span>${esc(new Date(a.detected_at).toLocaleString())}</span>
+              </div>
+              <div style="margin-top:6px; font-size:0.9rem;">${esc(a.title)}</div>
+              <div class="muted" style="margin-top:4px;">${esc(a.message)}</div>
+              <div style="margin-top:8px;">
+                <button data-role-action="ack-alert" ${canAck ? "" : "disabled"} onclick="ackAlert('${esc(a.alert_id)}')">Acknowledge</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
     }
 
     function renderAudit(rows) {
-      const root = byId('audit-list');
+      const root = byId("audit-list");
       if (!rows.length) {
-        root.innerHTML = '<p class="muted">No audit events found.</p>';
+        root.innerHTML = '<p class="muted">No audit events found for current filters.</p>';
         return;
       }
-      root.innerHTML = rows.map((e) => `
-        <div class="alert-item">
-          <div class="alert-head">
-            <span><strong>${e.action_type}</strong> | ${e.entity_type}:${e.entity_id}</span>
-            <span>${new Date(e.event_time).toLocaleString()}</span>
-          </div>
-          <div style="margin-top:6px; font-size:0.9rem;">Actor: ${e.actor_id}</div>
-          <div class="muted" style="margin-top:4px;">Hash: ${String(e.event_hash).slice(0, 18)}...</div>
-        </div>
-      `).join('');
+      root.innerHTML = rows
+        .map((e) => {
+          return `
+            <div class="alert-item">
+              <div class="alert-head">
+                <span><strong>${esc(e.action_type)}</strong> | ${esc(e.entity_type)}:${esc(e.entity_id)}</span>
+                <span>${esc(new Date(e.event_time).toLocaleString())}</span>
+              </div>
+              <div style="margin-top:6px; font-size:0.9rem;">Actor: ${esc(e.actor_id)}</div>
+              <div class="muted" style="margin-top:4px;">Hash: ${esc(String(e.event_hash || "").slice(0, 18))}...</div>
+            </div>
+          `;
+        })
+        .join("");
     }
 
     async function generateAuditPack() {
+      if (!hasAnyRole(["qa_manager", "compliance_manager", "admin"])) {
+        alert("Your role cannot generate audit packs.");
+        return;
+      }
       const now = new Date();
       const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0)).toISOString();
       const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59)).toISOString();
-      const res = await fetch('/api/v1/audit/packs/generate', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', ...getAuthHeaders()},
-        body: JSON.stringify({ from_ts: from, to_ts: to, limit: 10000 })
+      const res = await fetch("/api/v1/audit/packs/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ from_ts: from, to_ts: to, limit: 10000 }),
       });
       if (!res.ok) {
-        alert('Failed to generate audit pack');
+        alert("Failed to generate audit pack");
         return;
       }
       await refresh();
@@ -335,107 +660,274 @@
 
     async function verifyPack(packId) {
       const res = await fetch(`/api/v1/audit/packs/${packId}/verify`, {
-        method: 'POST',
-        headers: { ...getAuthHeaders() }
+        method: "POST",
+        headers: { ...getAuthHeaders() },
       });
       if (!res.ok) {
-        alert('Pack verification failed');
+        alert("Pack verification failed");
         return;
       }
       const data = await res.json();
-      alert(`Pack ${packId} verification: ${data.valid ? 'VALID' : 'INVALID'}`);
+      alert(`Pack ${packId} verification: ${data.valid ? "VALID" : "INVALID"}`);
       await refresh();
     }
 
-    async function downloadPackFile(packId, fileName) {
-      const res = await fetch(`/api/v1/audit/packs/${packId}/download/${fileName}`, {
-        headers: { ...getAuthHeaders() }
-      });
-      if (!res.ok) {
-        alert(`Download failed for ${fileName}`);
-        return;
-      }
-      const blob = await res.blob();
+    function downloadBlob(blob, fileName) {
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `${packId}_${fileName}`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     }
 
+    async function downloadPackFile(packId, fileName) {
+      try {
+        const blob = await fetchBlob(`/api/v1/audit/packs/${packId}/download/${fileName}`);
+        downloadBlob(blob, `${packId}_${fileName}`);
+      } catch (err) {
+        console.error(err);
+        alert(`Download failed for ${fileName}`);
+      }
+    }
+
     function renderPacks(rows) {
-      const root = byId('packs-list');
+      const root = byId("packs-list");
       if (!rows.length) {
         root.innerHTML = '<p class="muted">No audit packs generated yet.</p>';
         return;
       }
-      root.innerHTML = rows.map((p) => `
-        <div class="alert-item">
-          <div class="alert-head">
-            <span><strong>${p.pack_id}</strong></span>
-            <span>${new Date(p.created_at).toLocaleString()}</span>
-          </div>
-          <div class="muted" style="margin-top:6px;">Rows: ${p.row_count} | By: ${p.created_by}</div>
-          <div class="muted" style="margin-top:4px;">Path: ${p.folder_path}</div>
-          <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
-            <button onclick="verifyPack('${p.pack_id}')">Verify Pack</button>
-            <button onclick="downloadPackFile('${p.pack_id}', 'audit_events.csv')">Download CSV</button>
-            <button onclick="downloadPackFile('${p.pack_id}', 'manifest.json')">Download Manifest</button>
-            <button onclick="downloadPackFile('${p.pack_id}', 'checksums.json')">Download Checksums</button>
-          </div>
-        </div>
-      `).join('');
+      root.innerHTML = rows
+        .map((p) => {
+          return `
+            <div class="alert-item">
+              <div class="alert-head">
+                <span><strong>${esc(p.pack_id)}</strong></span>
+                <span>${esc(new Date(p.created_at).toLocaleString())}</span>
+              </div>
+              <div class="muted" style="margin-top:6px;">Rows: ${esc(p.row_count)} | By: ${esc(p.created_by)}</div>
+              <div class="muted" style="margin-top:4px;">Path: ${esc(p.folder_path)}</div>
+              <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+                <button onclick="verifyPack('${esc(p.pack_id)}')">Verify Pack</button>
+                <button onclick="downloadPackFile('${esc(p.pack_id)}', 'audit_events.csv')">Download CSV</button>
+                <button onclick="downloadPackFile('${esc(p.pack_id)}', 'manifest.json')">Download Manifest</button>
+                <button onclick="downloadPackFile('${esc(p.pack_id)}', 'checksums.json')">Download Checksums</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
     }
 
-    async function refresh() {
+    function toIsoDateTime(value) {
+      if (!value) return null;
+      return new Date(value).toISOString();
+    }
+
+    async function downloadAuditEventsCsv() {
+      if (!hasAnyRole(["viewer", "qa_manager", "compliance_manager", "admin"])) {
+        alert("Your role cannot export audit CSV.");
+        return;
+      }
+      const fromLocal = byId("audit-from").value;
+      const toLocal = byId("audit-to").value;
+      const limit = byId("audit-limit").value || "1000";
+      const params = new URLSearchParams();
+      params.set("limit", String(limit));
+      if (fromLocal) params.set("from_ts", toIsoDateTime(fromLocal));
+      if (toLocal) params.set("to_ts", toIsoDateTime(toLocal));
+
       try {
-        const [overview, auto, alerts, audit, packs] = await Promise.all([
-          getJson('/api/v1/dashboard/overview'),
-          getJson('/api/v1/automation/status'),
-          getJson('/api/v1/ccp/alerts?status=open&limit=30'),
-          getJson('/api/v1/audit/events?limit=12'),
-          getJson('/api/v1/audit/packs?limit=6')
-        ]);
-
-        byId('kpi-open-alerts').textContent = overview.alerts.open_alerts ?? 0;
-        byId('kpi-critical-alerts').textContent = overview.alerts.critical_open_alerts ?? 0;
-        byId('kpi-anomalies').textContent = (overview.anomalies_7d.critical_anomalies ?? 0) + (overview.anomalies_7d.warning_anomalies ?? 0);
-        byId('kpi-supplier-coverage').textContent = `${overview.latest_kpi.supplier_risk_coverage_pct ?? 0}%`;
-
-        renderRows('automation-status', [
-          ['Running', auto.daily_cycle_running ? 'Yes' : 'No'],
-          ['Current Run ID', auto.running_run?.run_id ?? '-'],
-          ['Last Run Status', auto.last_run?.status ?? '-'],
-          ['Last Run Started', auto.last_run?.started_at ? new Date(auto.last_run.started_at).toLocaleString() : '-']
-        ]);
-
-        renderRows('compliance-status', [
-          ['Pass Batches', overview.compliance.pass_batches ?? 0],
-          ['Warning Batches', overview.compliance.warning_batches ?? 0],
-          ['Fail Batches', overview.compliance.fail_batches ?? 0],
-          ['Quality Deviation Rate', overview.latest_kpi.quality_deviation_rate ?? '-']
-        ]);
-
-        renderAlerts(alerts.rows || []);
-        renderAudit(audit.rows || []);
-        renderPacks(packs.rows || []);
-        byId('last-refresh').textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+        const blob = await fetchBlob(`/api/v1/audit/events/export.csv?${params.toString()}`);
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        downloadBlob(blob, `audit_events_${stamp}.csv`);
       } catch (err) {
         console.error(err);
-        byId('last-refresh').textContent = 'Refresh failed';
+        alert("Audit CSV export failed");
       }
     }
 
-    setInterval(refresh, 15000);
+    function renderBatchComparison(comparisonResponse) {
+      const tableBody = byId("comparison-table-body");
+      const summaryRoot = byId("batch-summary");
+
+      if (!comparisonResponse || !Array.isArray(comparisonResponse.comparison) || !comparisonResponse.comparison.length) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="muted">No comparison rows found.</td></tr>';
+        summaryRoot.innerHTML = '<p class="muted">No compliance comparison data available for this batch.</p>';
+        return;
+      }
+
+      const summary = comparisonResponse.summary || {};
+      summaryRoot.innerHTML = `
+        <div class="row"><span>Total Parameters</span><strong>${esc(summary.total_parameters ?? 0)}</strong></div>
+        <div class="row"><span>Fail Count</span><strong>${esc(summary.fail_count ?? 0)}</strong></div>
+        <div class="row"><span>Warning Count</span><strong>${esc(summary.warning_count ?? 0)}</strong></div>
+      `;
+
+      tableBody.innerHTML = comparisonResponse.comparison
+        .map((row) => {
+          return `
+            <tr>
+              <td>${esc(row.parameter_code)}</td>
+              <td>${esc(row.batch_value)}</td>
+              <td>${esc(row.fssai_limit ?? "-")}</td>
+              <td>${esc(row.eu_limit ?? "-")}</td>
+              <td>${esc(row.codex_limit ?? "-")}</td>
+              <td>${esc(row.haccp_limit ?? "-")}</td>
+              <td>${statusChip(row.status)}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    async function loadBatchComparison(batchCode) {
+      const code = String(batchCode || "").trim();
+      if (!code) {
+        showError("Batch code is required.");
+        return;
+      }
+      state.selectedBatch = code;
+      byId("batch-code-input").value = code;
+      try {
+        const data = await fetchJson(`/api/v1/compliance/batch/${encodeURIComponent(code)}/comparison`);
+        renderBatchComparison(data);
+      } catch (err) {
+        console.error(err);
+        renderBatchComparison(null);
+        showError(`Failed to load comparison for ${code}. Confirm batch code and token permissions.`);
+      }
+    }
+
+    async function loadBatchComparisonFromInput() {
+      clearError();
+      await loadBatchComparison(byId("batch-code-input").value);
+    }
+
+    async function downloadBatchComparisonCsv() {
+      const code = String(byId("batch-code-input").value || state.selectedBatch || "").trim();
+      if (!code) {
+        showError("Batch code is required to export comparison CSV.");
+        return;
+      }
+      state.selectedBatch = code;
+      try {
+        const blob = await fetchBlob(`/api/v1/compliance/batch/${encodeURIComponent(code)}/comparison/export.csv`);
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        downloadBlob(blob, `batch_comparison_${code}_${stamp}.csv`);
+      } catch (err) {
+        console.error(err);
+        showError(`Comparison CSV export failed for ${code}.`);
+      }
+    }
+
+    async function downloadExportReadinessJson() {
+      const code = String(byId("batch-code-input").value || state.selectedBatch || "").trim();
+      if (!code) {
+        showError("Batch code is required to export readiness JSON.");
+        return;
+      }
+      state.selectedBatch = code;
+      try {
+        const data = await fetchJson(`/api/v1/compliance/batch/${encodeURIComponent(code)}/export-readiness`);
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        downloadBlob(blob, `export_readiness_${code}_${stamp}.json`);
+      } catch (err) {
+        console.error(err);
+        showError(`Readiness JSON export failed for ${code}.`);
+      }
+    }
+
+    async function loadWhoAmI() {
+      try {
+        const who = await fetchJson("/api/v1/auth/whoami");
+        state.user = who.user || null;
+      } catch (err) {
+        state.user = null;
+      }
+      updateIdentityUI();
+    }
+
+    function initAuditDateDefaults() {
+      const now = new Date();
+      const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+      const to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 0);
+      byId("audit-from").value = from.toISOString().slice(0, 16);
+      byId("audit-to").value = to.toISOString().slice(0, 16);
+    }
+
+    async function refresh() {
+      clearError();
+      await loadWhoAmI();
+
+      const [overviewRes, automationRes, alertsRes, auditRes, packsRes] = await Promise.allSettled([
+        fetchJson("/api/v1/dashboard/overview"),
+        fetchJson("/api/v1/automation/status"),
+        fetchJson("/api/v1/ccp/alerts?status=open&limit=30"),
+        fetchJson("/api/v1/audit/events?limit=12"),
+        fetchJson("/api/v1/audit/packs?limit=6"),
+      ]);
+
+      const overview = overviewRes.status === "fulfilled" ? overviewRes.value : {};
+      const auto = automationRes.status === "fulfilled" ? automationRes.value : {};
+      const alerts = alertsRes.status === "fulfilled" ? alertsRes.value : { rows: [] };
+      const audit = auditRes.status === "fulfilled" ? auditRes.value : { rows: [] };
+      const packs = packsRes.status === "fulfilled" ? packsRes.value : { rows: [] };
+
+      if (
+        overviewRes.status === "rejected" ||
+        automationRes.status === "rejected" ||
+        alertsRes.status === "rejected" ||
+        auditRes.status === "rejected" ||
+        packsRes.status === "rejected"
+      ) {
+        showError("Some dashboard panels could not refresh. Check token, role permissions, and API health.");
+      }
+
+      byId("kpi-open-alerts").textContent = overview.alerts?.open_alerts ?? 0;
+      byId("kpi-critical-alerts").textContent = overview.alerts?.critical_open_alerts ?? 0;
+      byId("kpi-anomalies").textContent = (overview.anomalies_7d?.critical_anomalies ?? 0) + (overview.anomalies_7d?.warning_anomalies ?? 0);
+      byId("kpi-supplier-coverage").textContent = `${overview.latest_kpi?.supplier_risk_coverage_pct ?? 0}%`;
+
+      renderRows("automation-status", [
+        ["Running", auto.daily_cycle_running ? "Yes" : "No"],
+        ["Current Run ID", auto.running_run?.run_id ?? "-"],
+        ["Last Run Status", auto.last_run?.status ?? "-"],
+        ["Last Run Started", auto.last_run?.started_at ? new Date(auto.last_run.started_at).toLocaleString() : "-"],
+      ]);
+
+      renderRows("compliance-status", [
+        ["Pass Batches", overview.compliance?.pass_batches ?? 0],
+        ["Warning Batches", overview.compliance?.warning_batches ?? 0],
+        ["Fail Batches", overview.compliance?.fail_batches ?? 0],
+        ["Quality Deviation Rate", overview.latest_kpi?.quality_deviation_rate ?? "-"],
+      ]);
+
+      renderAlerts(alerts.rows || []);
+      renderAudit(audit.rows || []);
+      renderPacks(packs.rows || []);
+      await loadBatchComparison(state.selectedBatch);
+
+      updateActionVisibility();
+      byId("last-refresh").textContent = `Last refresh: ${new Date().toLocaleTimeString()}`;
+    }
+
+    initAuditDateDefaults();
     refresh();
+    setInterval(refresh, 15000);
+
     window.ackAlert = ackAlert;
     window.downloadPackFile = downloadPackFile;
+    window.downloadAuditEventsCsv = downloadAuditEventsCsv;
+    window.downloadBatchComparisonCsv = downloadBatchComparisonCsv;
+    window.downloadExportReadinessJson = downloadExportReadinessJson;
     window.generateAuditPack = generateAuditPack;
     window.verifyPack = verifyPack;
     window.setAuthToken = setAuthToken;
+    window.loadBatchComparisonFromInput = loadBatchComparisonFromInput;
   </script>
 </body>
 </html>
