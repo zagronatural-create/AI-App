@@ -235,11 +235,17 @@ def main() -> int:
         coverage_url = f"{base_url}/api/v1/compliance/regulatory/releases/{release_id}/coverage"
         cov_code, cov_body = _json_request(coverage_url, token=args.token)
         print(json.dumps({"step": "coverage", "status_code": cov_code, "release_id": release_id, "response": cov_body}, indent=2))
-        if cov_code != 200:
+        coverage_available = cov_code == 200
+        if not coverage_available and not (cov_code == 404 and cov_body.get("detail") == "Not Found"):
             overall_ok = False
             continue
 
-        if (args.approve or args.publish) and not cov_body.get("ready_for_approval", False) and not args.allow_incomplete:
+        if (
+            coverage_available
+            and (args.approve or args.publish)
+            and not cov_body.get("ready_for_approval", False)
+            and not args.allow_incomplete
+        ):
             print(
                 json.dumps(
                     {
@@ -277,6 +283,8 @@ def main() -> int:
     active_code, active_body = _json_request(active_url, token=args.token)
     print(json.dumps({"step": "active_coverage", "status_code": active_code, "response": active_body}, indent=2))
 
+    if active_code == 404 and active_body.get("detail") == "Not Found":
+        return 0 if overall_ok else 1
     if active_code != 200:
         return 1
 
